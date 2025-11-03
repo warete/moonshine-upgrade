@@ -11,7 +11,6 @@ class UpgradeCommand extends MoonShineCommand
 {
     public function __construct(protected Factory $upgradeFactory)
     {
-        parent::__construct();
     }
 
     protected $signature = 'moonshine:upgrade {version=4} {--dry-run}';

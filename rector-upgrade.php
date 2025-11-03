@@ -15,4 +15,18 @@ return static function (RectorConfig $rectorConfig): void {
             'MoonShine\\Laravel\\Http\\Responses\\MoonShineJsonResponse' => 'MoonShine\\Crud\\JsonResponse',
         ],
     );
+
+    $allowedBuilders = [
+        'MoonShine\\UI\\Components\\ActionButton',
+        'MoonShine\\UI\Components\\FormBuilder',
+        'MoonShine\\Advanced\\Components\\Tabs\\AsyncTab',
+    ];
+
+    $attributeFqcn = 'MoonShine\\Support\\Attributes\\AsyncMethod';
+
+    $rectorConfig->ruleWithConfiguration(\Warete\MoonshineUpgrade\Rector\AddAsyncMethodAttributeRector::class, [
+        'attributeFqcn' => $attributeFqcn,
+        'allowedBuilderClasses' => $allowedBuilders,
+    ]);
+
 };

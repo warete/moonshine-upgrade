@@ -16,7 +16,6 @@ use Warete\MoonshineUpgrade\Utils\PSR4;
 class V4 implements VersionStrategy
 {
     use WithCore;
-    public $core;
 
     public function __construct(
         protected bool $isDryRun,
