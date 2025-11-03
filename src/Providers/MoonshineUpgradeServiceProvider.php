@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Warete\MoonshineUpgrade\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Warete\MoonshineUpgrade\Commands\UpgradeCommand;
 
 final class MoonshineUpgradeServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,8 @@ final class MoonshineUpgradeServiceProvider extends ServiceProvider
             __DIR__ . '/../../lang' => $this->app->langPath('warete/moonshine-upgrade'),
         ]);
 
-        $this->commands([]);
+        $this->commands([
+            UpgradeCommand::class,
+        ]);
     }
 }

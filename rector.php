@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\CodeQuality\Rector\If_\ExplicitBoolCompareRector;
 use Rector\Config\RectorConfig;
 use Rector\Php81\Rector\Array_\FirstClassCallableRector;
@@ -10,10 +11,6 @@ use Rector\Set\ValueObject\SetList;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
-        __DIR__ . '/config',
-        __DIR__ . '/lang',
-        __DIR__ . '/database',
-        __DIR__ . '/routes',
         __DIR__ . '/src',
     ]);
 
@@ -33,7 +30,7 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->importShortClasses();
     $rectorConfig->removeUnusedImports();
 
-    $rectorConfig->rule(Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector::class);
+    $rectorConfig->rule(ExplicitNullableParamTypeRector::class);
 
     $rectorConfig->sets([
         LevelSetList::UP_TO_PHP_82,
