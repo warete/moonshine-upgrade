@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace VendorName\PackageName\Testing;
+namespace Warete\MoonshineUpgrade\Testing;
 
 use Illuminate\Support\ServiceProvider;
 use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;

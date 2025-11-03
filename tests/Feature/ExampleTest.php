@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace VendorName\PackageName\Tests\Feature;
+namespace Warete\MoonshineUpgrade\Tests\Feature;
 
 use PHPUnit\Framework\Attributes\Test;
-use VendorName\PackageName\Tests\TestCase;
+use Warete\MoonshineUpgrade\Tests\TestCase;
 
 final class ExampleTest extends TestCase
 {

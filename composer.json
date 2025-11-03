@@ -1,9 +1,9 @@
 {
-    "name": ":vendor_name/:package_name",
-    "description": "Description",
-    "keywords": ["keyword"],
+    "name": "warete/moonshine-upgrade",
+    "description": "Package for upgrade MoonShine",
+    "keywords": ["moonshine", "upgrade"],
     "type": "library",
-    "homepage": "https://moonshine.cutcode.dev",
+    "homepage": "https://getmoonshine.app",
     "license": "MIT",
     "support": {
         "issues": "https://github.com/:vendor_name/:package_name/issues",
@@ -11,31 +11,29 @@
     },
     "authors": [
         {
-            "name": "Author name",
-            "email": "author@example.com",
-            "homepage": "https://example.com"
+            "name": "Egor Borisovsky",
+            "email": "egor.borisovskiy@gmail.com",
+            "homepage": "https://github.com/warete"
         }
     ],
     "require": {
-        "php": "^8.0|^8.1|^8.2",
-        "ext-curl": "*",
-        "ext-json": "*"
+        "php": "^8.2",
+        "rector/rector": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",
         "orchestra/testbench": "^9.0",
-        "rector/rector": "^1.0",
-        "moonshine/moonshine": "3.x-dev"
+        "moonshine/moonshine": "4.x-dev"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\PackageName\\": "src/"
+            "Warete\\MoonshineUpgrade\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\PackageName\\Tests\\": "tests/",
-            "VendorName\\PackageName\\Database\\Factories\\": "database/factories/"
+            "Warete\\MoonshineUpgrade\\Tests\\": "tests/",
+            "Warete\\MoonshineUpgrade\\Database\\Factories\\": "database/factories/"
         }
     },
     "conflict": {
@@ -49,7 +47,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\PackageName\\Providers\\PackageNameServiceProvider"
+                "MoonshineUpgradeServiceProvider"
             ]
         }
     }
