@@ -4,6 +4,11 @@ namespace Warete\MoonshineUpgrade\VersionStrategies;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
+
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\progress;
+use function Laravel\Prompts\spin;
+
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\ResourceContract;
 use MoonShine\Core\Resources\Resources;
@@ -11,10 +16,6 @@ use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
-
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\progress;
-use function Laravel\Prompts\spin;
 
 class V4 implements VersionStrategy
 {
@@ -36,6 +37,7 @@ class V4 implements VersionStrategy
                 "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun}"
             );
             $process->timeout(120);
+
             return $process->run();
         }, 'Upgrade by rector in progress');
         if ($processOutput->successful()) {
@@ -48,7 +50,7 @@ class V4 implements VersionStrategy
         $resources = $this->core->getResources();
 
         info('Upgrading resources and pages');
-        progress('Upgrading resources', $resources, function ($resource, $progress) use ($resources) {
+        progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
             $progress
                 ->label("Upgrading resource: {$resource->getTitle()}");
             $this->upgradeResource($resource, $progress);

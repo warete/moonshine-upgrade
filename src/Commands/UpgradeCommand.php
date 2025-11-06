@@ -2,13 +2,13 @@
 
 namespace Warete\MoonshineUpgrade\Commands;
 
-use MoonShine\Laravel\Commands\MoonShineCommand;
-use Symfony\Component\Console\Attribute\AsCommand;
-use Warete\MoonshineUpgrade\VersionStrategies\Factory;
-
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
+
+use MoonShine\Laravel\Commands\MoonShineCommand;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Warete\MoonshineUpgrade\VersionStrategies\Factory;
 
 #[AsCommand('moonshine:upgrade')]
 class UpgradeCommand extends MoonShineCommand

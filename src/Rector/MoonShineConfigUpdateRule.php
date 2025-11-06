@@ -9,7 +9,6 @@ use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
-use Rector\Contract\Rector\ConfigurableRectorInterface;
 use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
@@ -30,17 +29,17 @@ final class MoonShineConfigUpdateRule extends AbstractRector
 
     public function refactor(Node $node): ?Node
     {
-        if (!$node instanceof Return_) {
+        if (! $node instanceof Return_) {
             return null;
         }
 
         // Работаем только с /config/moonshine.php
         $filePath = $this->file->getFilePath();
-        if (!str_ends_with($filePath, '/config/moonshine.php')) {
+        if (! str_ends_with($filePath, '/config/moonshine.php')) {
             return null;
         }
 
-        if (!$node->expr instanceof Array_) {
+        if (! $node->expr instanceof Array_) {
             return null;
         }
 
@@ -68,7 +67,7 @@ final class MoonShineConfigUpdateRule extends AbstractRector
         $hasPalette = false;
 
         foreach ($array->items as $index => $item) {
-            if (!$item instanceof ArrayItem || !$item->key instanceof String_) {
+            if (! $item instanceof ArrayItem || ! $item->key instanceof String_) {
                 continue;
             }
 
@@ -101,7 +100,7 @@ final class MoonShineConfigUpdateRule extends AbstractRector
     private function convertAuthMiddlewareToArray(Array_ $array): bool
     {
         foreach ($array->items as $item) {
-            if (!$item instanceof ArrayItem || !$item->key instanceof String_) {
+            if (! $item instanceof ArrayItem || ! $item->key instanceof String_) {
                 continue;
             }
 
@@ -109,12 +108,12 @@ final class MoonShineConfigUpdateRule extends AbstractRector
                 continue;
             }
 
-            if (!$item->value instanceof Array_) {
+            if (! $item->value instanceof Array_) {
                 continue;
             }
 
             foreach ($item->value->items as $authItem) {
-                if (!$authItem instanceof ArrayItem || !$authItem->key instanceof String_) {
+                if (! $authItem instanceof ArrayItem || ! $authItem->key instanceof String_) {
                     continue;
                 }
 
@@ -129,7 +128,7 @@ final class MoonShineConfigUpdateRule extends AbstractRector
 
                 // Преобразуем в массив
                 $authItem->value = new Array_([
-                    new ArrayItem($authItem->value)
+                    new ArrayItem($authItem->value),
                 ]);
 
                 return true;
