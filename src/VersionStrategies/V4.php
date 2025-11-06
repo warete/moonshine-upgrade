@@ -11,7 +11,6 @@ use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
-use Warete\MoonshineUpgrade\Utils\PSR4;
 
 class V4 implements VersionStrategy
 {
@@ -37,6 +36,7 @@ class V4 implements VersionStrategy
             $this->command?->info('Successfully upgraded by rector');
         } else {
             $this->command?->error(\sprintf('Failed to upgrade by rector: %s', $processOutput->output()));
+
             return;
         }
 

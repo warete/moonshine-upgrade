@@ -8,8 +8,10 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PHPStan\Type\ObjectType;
 use Rector\Contract\Rector\ConfigurableRectorInterface;
+use Rector\Rector\AbstractRector;
+use Rector\RuleDocGenerator\ValueObject\RuleDefinition;
 
-final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRector implements ConfigurableRectorInterface
+final class ReorderConfiguredMethodArgsRector extends AbstractRector implements ConfigurableRectorInterface
 {
     /**
      * [
@@ -40,13 +42,13 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
     {
         $normalized = [];
         foreach ($configuration as $item) {
-            $class  = $item['class']  ?? ($item[0] ?? null);
+            $class = $item['class'] ?? ($item[0] ?? null);
             $method = $item['method'] ?? ($item[1] ?? null);
             $callTypes = $item['call_types'] ?? ($item[2] ?? 'both');
-            $swap  = $item['swap']  ?? null;
+            $swap = $item['swap'] ?? null;
             $order = $item['order'] ?? null;
 
-            if (!$class || !$method) {
+            if (! $class || ! $method) {
                 continue;
             }
             $class = ltrim((string) $class, '\\');
@@ -54,15 +56,15 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
             $callTypes = \in_array($callTypes, ['both','static','instance'], true) ? $callTypes : 'both';
 
             $rule = [
-                'class'      => $class,
-                'method'     => $method,
+                'class' => $class,
+                'method' => $method,
                 'call_types' => $callTypes,
             ];
 
             if (\is_array($swap) && \count($swap) === 2) {
                 $rule['swap'] = [ (int) $swap[0], (int) $swap[1] ];
             } elseif (\is_array($order) && $order !== []) {
-                $rule['order'] = array_map('intval', $order);
+                $rule['order'] = array_map(intval(...), $order);
             } else {
                 continue;
             }
@@ -81,7 +83,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
         return [MethodCall::class, StaticCall::class];
     }
 
-    public function refactor(Node $node): Node|int|null
+    public function refactor(Node $node): ?Node
     {
         foreach ($this->rules as $rule) {
             $callTypes = $rule['call_types'];
@@ -101,6 +103,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
                 $newArgs = $this->reorderedArgs($node->args, $rule);
                 if ($newArgs !== null) {
                     $node->args = $newArgs;
+
                     return $node;
                 }
             }
@@ -120,6 +123,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
                 $newArgs = $this->reorderedArgs($node->args, $rule);
                 if ($newArgs !== null) {
                     $node->args = $newArgs;
+
                     return $node;
                 }
             }
@@ -138,6 +142,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
                 return true;
             }
         }
+
         return false;
     }
 
@@ -151,7 +156,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
         if (isset($rule['swap'])) {
             [$i, $j] = $rule['swap'];
 
-            if (!isset($args[$i]) || !isset($args[$j])) {
+            if (! isset($args[$i]) || ! isset($args[$j])) {
                 return null;
             }
             if ($i === $j) {
@@ -162,6 +167,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
             $tmp = $new[$i];
             $new[$i] = $new[$j];
             $new[$j] = $tmp;
+
             return $new;
         }
 
@@ -179,6 +185,7 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
             if ($this->argsEqual($args, $new)) {
                 return null;
             }
+
             return $new;
         }
 
@@ -195,16 +202,17 @@ final class ReorderConfiguredMethodArgsRector extends \Rector\Rector\AbstractRec
             return false;
         }
         foreach ($a as $i => $arg) {
-            if (!isset($b[$i]) || $b[$i] !== $arg) {
+            if (! isset($b[$i]) || $b[$i] !== $arg) {
                 return false;
             }
         }
+
         return true;
     }
 
-    public function getRuleDefinition(): \Rector\RuleDocGenerator\ValueObject\RuleDefinition
+    public function getRuleDefinition(): RuleDefinition
     {
-        return new \Rector\RuleDocGenerator\ValueObject\RuleDefinition(
+        return new RuleDefinition(
             'Reorder/swap arguments for configured method or static calls',
             []
         );

@@ -12,7 +12,6 @@ use PhpParser\NodeVisitor;
 use PHPStan\Type\ObjectType;
 use Rector\Contract\Rector\ConfigurableRectorInterface;
 use Rector\Rector\AbstractRector;
-use PhpParser\NodeTraverser;
 
 final class RemoveConfiguredMethodPairsRector extends AbstractRector implements ConfigurableRectorInterface
 {
@@ -27,14 +26,14 @@ final class RemoveConfiguredMethodPairsRector extends AbstractRector implements 
         $this->targets = [];
 
         foreach ($configuration as $item) {
-            $class  = $item['class']  ?? ($item[0] ?? null);
+            $class = $item['class'] ?? ($item[0] ?? null);
             $method = $item['method'] ?? ($item[1] ?? null);
 
-            if (!$class || !$method) {
+            if (! $class || ! $method) {
                 continue;
             }
 
-            $class  = ltrim((string) $class, '\\');
+            $class = ltrim((string) $class, '\\');
             $method = (string) $method;
 
             $this->targets[$class][$method] = true;
@@ -52,8 +51,8 @@ final class RemoveConfiguredMethodPairsRector extends AbstractRector implements 
             $expr = $node->expr;
 
             if (
-                ($expr instanceof MethodCall  && $this->isTargetInstance($expr)) ||
-                ($expr instanceof StaticCall  && $this->isTargetStatic($this->getName($expr->class), $this->getName($expr->name)))
+                ($expr instanceof MethodCall && $this->isTargetInstance($expr)) ||
+                ($expr instanceof StaticCall && $this->isTargetStatic($this->getName($expr->class), $this->getName($expr->name)))
             ) {
                 return NodeVisitor::REMOVE_NODE;
             }
@@ -62,11 +61,12 @@ final class RemoveConfiguredMethodPairsRector extends AbstractRector implements 
         }
 
         if ($node instanceof StaticCall) {
-            $className  = $this->getName($node->class);
+            $className = $this->getName($node->class);
             $methodName = $this->getName($node->name);
             if ($this->isTargetStatic($className, $methodName)) {
                 return new ConstFetch(new Name('null'));
             }
+
             return null;
         }
 
@@ -74,6 +74,7 @@ final class RemoveConfiguredMethodPairsRector extends AbstractRector implements 
             if ($this->isTargetInstance($node)) {
                 return $node->var;
             }
+
             return null;
         }
 
@@ -82,24 +83,30 @@ final class RemoveConfiguredMethodPairsRector extends AbstractRector implements 
 
     private function isTargetStatic(?string $className, ?string $methodName): bool
     {
-        if ($className === null || $methodName === null) return false;
+        if ($className === null || $methodName === null) {
+            return false;
+        }
         $className = ltrim($className, '\\');
+
         return isset($this->targets[$className][$methodName]);
     }
 
     private function isTargetInstance(MethodCall $call): bool
     {
         $methodName = $this->getName($call->name);
-        if ($methodName === null) return false;
+        if ($methodName === null) {
+            return false;
+        }
 
         foreach ($this->targets as $fqcn => $methods) {
-            if (!isset($methods[$methodName])) {
+            if (! isset($methods[$methodName])) {
                 continue;
             }
             if ($this->isObjectType($call->var, new ObjectType($fqcn))) {
                 return true;
             }
         }
+
         return false;
     }
 }

@@ -27,14 +27,14 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
     public function configure(array $configuration): void
     {
         foreach ($configuration as $rule) {
-            if (!is_array($rule) || !isset($rule['class'])) {
+            if (! is_array($rule) || ! isset($rule['class'])) {
                 continue;
             }
 
-            $class = ltrim($rule['class'], '\\');
+            $class = ltrim((string) $rule['class'], '\\');
 
             // Инициализируем массив для класса, если его еще нет
-            if (!isset($this->deprecationRules[$class])) {
+            if (! isset($this->deprecationRules[$class])) {
                 $this->deprecationRules[$class] = [
                     'methods' => [],
                     'properties' => [],
@@ -75,7 +75,7 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
 
     public function refactor(Node $node): ?Node
     {
-        if (!$node instanceof Class_) {
+        if (! $node instanceof Class_) {
             return null;
         }
 
@@ -88,38 +88,34 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
 
         // Проверяем все родительские классы
         foreach ($this->deprecationRules as $baseClass => $rules) {
-            if (!$this->isClassOrSubclass($className, $baseClass)) {
+            if (! $this->isClassOrSubclass($className, $baseClass)) {
                 continue;
             }
 
             // Обрабатываем свойства
-            if (!empty($rules['properties'])) {
+            if (! empty($rules['properties'])) {
                 foreach ($node->getProperties() as $property) {
                     $propertyName = $this->getName($property);
                     if ($propertyName === null) {
                         continue;
                     }
 
-                    if (isset($rules['properties'][$propertyName])) {
-                        if ($this->addDeprecatedDoc($property, $rules['properties'][$propertyName])) {
-                            $changed = true;
-                        }
+                    if (isset($rules['properties'][$propertyName]) && $this->addDeprecatedDoc($property, $rules['properties'][$propertyName])) {
+                        $changed = true;
                     }
                 }
             }
 
             // Обрабатываем методы
-            if (!empty($rules['methods'])) {
+            if (! empty($rules['methods'])) {
                 foreach ($node->getMethods() as $method) {
                     $methodName = $this->getName($method);
                     if ($methodName === null) {
                         continue;
                     }
 
-                    if (isset($rules['methods'][$methodName])) {
-                        if ($this->addDeprecatedDoc($method, $rules['methods'][$methodName])) {
-                            $changed = true;
-                        }
+                    if (isset($rules['methods'][$methodName]) && $this->addDeprecatedDoc($method, $rules['methods'][$methodName])) {
+                        $changed = true;
                     }
                 }
             }
@@ -136,7 +132,7 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
         // Проверяем, есть ли уже @deprecated
         $docComment = $node->getDocComment();
 
-        if ($docComment !== null) {
+        if ($docComment instanceof Doc) {
             $text = $docComment->getText();
             if (str_contains($text, '@deprecated')) {
                 return false; // Уже есть @deprecated, ничего не делаем
@@ -167,11 +163,11 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
             return true;
         }
 
-        if (!$this->reflectionProvider->hasClass($className)) {
+        if (! $this->reflectionProvider->hasClass($className)) {
             return false;
         }
 
-        if (!$this->reflectionProvider->hasClass($baseClass)) {
+        if (! $this->reflectionProvider->hasClass($baseClass)) {
             return false;
         }
 
