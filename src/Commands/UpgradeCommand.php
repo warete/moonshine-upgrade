@@ -9,16 +9,16 @@ use Warete\MoonshineUpgrade\VersionStrategies\Factory;
 #[AsCommand('moonshine:upgrade')]
 class UpgradeCommand extends MoonShineCommand
 {
-    public function __construct(protected Factory $upgradeFactory)
-    {
-    }
+    protected Factory $upgradeFactory;
 
     protected $signature = 'moonshine:upgrade {version=4} {--dry-run}';
 
     protected $description = 'Upgrade moonshine';
 
-    public function handle(): int
+    public function handle(Factory $upgradeFactory): int
     {
+        $this->upgradeFactory = $upgradeFactory;
+
         $version = (int)$this->argument('version');
 
         $isDryRun = (bool)$this->option('dry-run');

@@ -16,21 +16,10 @@ final class MoonshineUpgradeServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../../lang', 'moonshine-upgrade');
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'moonshine-upgrade');
 
         $this->publishes([
-            __DIR__ . '/../../config/moonshine-upgrade.php' => config_path('moonshine-upgrade.php'),
-        ]);
-
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/moonshine-upgrade.php',
-            'moonshine-upgrade'
-        );
-
-        $this->publishes([
-            __DIR__ . '/../../lang' => $this->app->langPath('warete/moonshine-upgrade'),
+            __DIR__ . '/../../rector-upgrade.php' => base_path('rector-upgrade.php'),
         ]);
 
         $this->commands([
