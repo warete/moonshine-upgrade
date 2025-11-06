@@ -44,12 +44,5 @@
         "test": "vendor/bin/phpunit",
         "rector": "vendor/bin/rector process --clear-cache",
         "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Warete\\MoonshineUpgrade\\Providers\\MoonshineUpgradeServiceProvider"
-            ]
-        }
     }
 }
