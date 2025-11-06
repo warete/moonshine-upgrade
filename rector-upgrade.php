@@ -16,6 +16,57 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/vendor',
     ]);
 
+    $rectorConfig->ruleWithConfiguration(\Warete\MoonshineUpgrade\Rector\ChangeMethodSignatureRector::class, [
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'beforeCreating',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'afterCreated',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'beforeUpdating',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'afterUpdated',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'beforeDeleting',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+        [
+            'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
+            'method' => 'afterDeleted',
+            'params' => [
+                0 => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+            ],
+            'return' => 'MoonShine\\Contracts\\Core\\TypeCasts\\DataWrapperContract',
+        ],
+    ]);
+
     $rectorConfig->ruleWithConfiguration(
         RenameClassRector::class,
         [
@@ -88,5 +139,4 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->removeUnusedImports();
     $rectorConfig->importNames();
     $rectorConfig->importShortClasses();
-
 };
