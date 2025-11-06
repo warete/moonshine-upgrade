@@ -22,11 +22,19 @@ return static function (RectorConfig $rectorConfig): void {
             'MoonShine\\Laravel\\MoonShineRequest' => 'MoonShine\\Contracts\\Core\\DependencyInjection\\CrudRequestContract',
             'MoonShine\\Laravel\\Http\\Responses\\MoonShineJsonResponse' => 'MoonShine\\Crud\\JsonResponse',
             'MoonShine\\Laravel\\Enums\\Action' => 'MoonShine\\Support\\Enums\\Action',
+            'MoonShine\Laravel\Traits\WithComponentsPusher' => 'MoonShine\\Crud\\Traits\\WithComponentsPusher',
+            'MoonShine\\Laravel\\Layouts\\CompactLayout' => 'MoonShine\\Laravel\\Layouts\\AppLayout',
+            'MoonShine\\Laravel\\Resources\\CrudResource' => 'MoonShine\\Crud\\Resources\\CrudResource',
+            #forms
             'MoonShine\\Laravel\\Forms\\FiltersForm' => 'MoonShine\\Crud\\Forms\\FiltersForm',
             'MoonShine\\Laravel\\Forms\\LoginForm' => 'MoonShine\\Crud\\Forms\\LoginForm',
-            'MoonShine\Laravel\Traits\WithComponentsPusher' => 'MoonShine\\Crud\\Traits\\WithComponentsPusher',
+            //components
+            'MoonShine\\Laravel\\Components\\Fragment' => 'MoonShine\\Crud\\Components\\Fragment',
+            'MoonShine\\Laravel\\Components\\Paginator' => 'MoonShine\\Crud\\Components\\Paginator',
+            'MoonShine\Laravel\Components\Layout\Locales' => 'MoonShine\\Crud\\Components\\Layout\\Locales',
+            'MoonShine\Laravel\Components\Layout\Notifications' => 'MoonShine\\Crud\\Components\\Layout\\Notifications',
+            'MoonShine\Laravel\Components\Layout\Search' => 'MoonShine\\Crud\\Components\\Layout\\Search',
             'MoonShine\\UI\\Fields\\StackFields' => 'MoonShine\\UI\\Fields\\Fieldset',
-            'MoonShine\\Laravel\\Layouts\\CompactLayout' => 'MoonShine\\Laravel\\Layouts\\AppLayout',
         ],
     );
 
@@ -75,6 +83,8 @@ return static function (RectorConfig $rectorConfig): void {
         ],
     ]);
 
+
+    $rectorConfig->rule(\Warete\MoonshineUpgrade\Rector\MoonShineConfigUpdateRule::class);
     $rectorConfig->removeUnusedImports();
     $rectorConfig->importNames();
     $rectorConfig->importShortClasses();
