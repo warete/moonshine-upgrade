@@ -26,17 +26,18 @@ class V4 implements VersionStrategy
 
     public function __invoke(): void
     {
-        $basePath = PSR4::getDirByNamespace($this->core->getConfig()->getNamespace());
+        $basePath = base_path();
         $this->command?->info('Starting upgrade by rector');
         $process = Process::command(
-            "./vendor/bin/rector --config vendor/warete/moonshine-upgrade/rector-upgrade.php {$basePath} --clear-cache"
+            "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv"
         );
         $process->timeout(120);
         $processOutput = $process->run();
         if ($processOutput->successful()) {
             $this->command?->info('Successfully upgraded by rector');
         } else {
-            $this->command?->error('Failed to upgrade by rector');
+            $this->command?->error(\sprintf('Failed to upgrade by rector: %s', $processOutput->output()));
+            return;
         }
 
         /** @var Resources $resources */
