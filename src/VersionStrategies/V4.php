@@ -12,6 +12,10 @@ use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
 
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\progress;
+use function Laravel\Prompts\spin;
+
 class V4 implements VersionStrategy
 {
     use WithCore;
@@ -25,31 +29,34 @@ class V4 implements VersionStrategy
 
     public function __invoke(): void
     {
-        $basePath = base_path();
-        $this->command?->info('Starting upgrade by rector');
-        $process = Process::command(
-            "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv"
-        );
-        $process->timeout(120);
-        $processOutput = $process->run();
+        $processOutput = spin(function () {
+            $basePath = base_path();
+            $rectorDryRun = $this->isDryRun ? ' --dry-run || exit 0' : '';
+            $process = Process::command(
+                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun}"
+            );
+            $process->timeout(120);
+            return $process->run();
+        }, 'Upgrade by rector in progress');
         if ($processOutput->successful()) {
-            $this->command?->info('Successfully upgraded by rector');
+            info('Successfully upgraded by rector');
         } else {
-            $this->command?->error(\sprintf('Failed to upgrade by rector: %s', $processOutput->output()));
-
-            return;
+            $this->command?->fail(\sprintf('Failed to upgrade by rector: %s', $processOutput->output()));
         }
 
         /** @var Resources $resources */
         $resources = $this->core->getResources();
 
-        foreach ($resources as $resource) {
-            $this->command?->info("Upgrading resource: {$resource->getTitle()}");
-            $this->upgradeResource($resource);
-        }
+        info('Upgrading resources and pages');
+        progress('Upgrading resources', $resources, function ($resource, $progress) use ($resources) {
+            $progress
+                ->label("Upgrading resource: {$resource->getTitle()}");
+            $this->upgradeResource($resource, $progress);
+            sleep(1);
+        });
     }
 
-    protected function upgradeResource(ResourceContract $resource): void
+    protected function upgradeResource(ResourceContract $resource, \Laravel\Prompts\Progress $progress): void
     {
         $rResource = new ReflectionClass($resource);
         $resourceName = str($rResource->getShortName())
@@ -63,21 +70,22 @@ class V4 implements VersionStrategy
         $newClassDir = $classDir . DIRECTORY_SEPARATOR . $resourceName;
         $newClassPath = $newClassDir . DIRECTORY_SEPARATOR . $classFileName;
 
-        $this->command?->info("Starting move class {$classFilePath}");
+        $progress->hint("[{$resourceName}] Starting move resource class");
         $moveResult = $this->moveClass($classFilePath, $newClassPath);
 
         if ($moveResult) {
-            $this->command?->info("Moved resource: {$resourceName}");
+            $progress->hint("[{$resourceName}] Resource was moved");
         } else {
-            $this->command?->error("Failed to move resource: {$resourceName}");
+            $this->command?->fail("\t[{$resourceName}] Failed to move resource");
         }
 
+        $progress->hint("[{$resourceName}] Starting upgrade resource pages");
         foreach ($resource->getPages() as $page) {
-            $this->upgradePage($page, $newClassDir);
+            $this->upgradePage($page, $newClassDir, $progress);
         }
     }
 
-    protected function upgradePage(PageContract $page, string $resourceDir): void
+    protected function upgradePage(PageContract $page, string $resourceDir, \Laravel\Prompts\Progress $progress): void
     {
         $rPage = new ReflectionClass($page);
         $pageName = str($rPage->getShortName())
@@ -92,17 +100,21 @@ class V4 implements VersionStrategy
             return;
         }
 
+        $progress->hint("[{$pageName}] Starting move page class");
         $moveResult = $this->moveClass($classFilePath, $newClassPath);
         if ($moveResult) {
-            $this->command?->info("Moved page: {$pageName}");
+            $progress->hint("[{$pageName}] Page was moved");
         } else {
-            $this->command?->error("Failed to move page: {$pageName}");
+            $this->command?->fail("[{$pageName}] Failed to move page");
         }
     }
 
     protected function moveClass(string $from, string $to): bool
     {
         try {
+            if ($this->isDryRun) {
+                return true;
+            }
             (new PHPActor())->moveClass($from, $to);
 
             return true;
