@@ -7,7 +7,7 @@ A small package that helps automate migration of a MoonShine application to a ne
 
 | MoonShine | moonshine-upgrade | Currently supported |
 |:---------:|:-----------------:|:-------------------:|
-|  \>= 3.0  |        3.*        |         yes         |
+|  \>= 3.0  |        1.*        |         yes         |
 
 ## Install
 
