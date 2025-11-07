@@ -6,8 +6,8 @@
     "homepage": "https://getmoonshine.app",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/:vendor_name/:package_name/issues",
-        "source": "https://github.com/:vendor_name/:package_name"
+        "issues": "https://github.com/waretee/moonshine-upgrade/issues",
+        "source": "https://github.com/waretee/moonshine-upgrade"
     },
     "authors": [
         {
