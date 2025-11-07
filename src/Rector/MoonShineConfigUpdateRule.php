@@ -33,7 +33,6 @@ final class MoonShineConfigUpdateRule extends AbstractRector
             return null;
         }
 
-        // Работаем только с /config/moonshine.php
         $filePath = $this->file->getFilePath();
         if (! str_ends_with($filePath, '/config/moonshine.php')) {
             return null;
@@ -46,13 +45,11 @@ final class MoonShineConfigUpdateRule extends AbstractRector
         $array = $node->expr;
         $changed = false;
 
-        // 1. Добавляем palette после layout
         $paletteAdded = $this->addPaletteAfterLayout($array);
         if ($paletteAdded) {
             $changed = true;
         }
 
-        // 2. Преобразуем auth.middleware в массив
         $middlewareConverted = $this->convertAuthMiddlewareToArray($array);
         if ($middlewareConverted) {
             $changed = true;
@@ -121,12 +118,10 @@ final class MoonShineConfigUpdateRule extends AbstractRector
                     continue;
                 }
 
-                // Если уже массив - ничего не делаем
                 if ($authItem->value instanceof Array_) {
                     return false;
                 }
 
-                // Преобразуем в массив
                 $authItem->value = new Array_([
                     new ArrayItem($authItem->value),
                 ]);

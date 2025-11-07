@@ -33,7 +33,6 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
 
             $class = ltrim((string) $rule['class'], '\\');
 
-            // Инициализируем массив для класса, если его еще нет
             if (! isset($this->deprecationRules[$class])) {
                 $this->deprecationRules[$class] = [
                     'methods' => [],
@@ -41,7 +40,6 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
                 ];
             }
 
-            // Поддержка формата: ['class' => ..., 'methods' => [...], 'properties' => [...]]
             if (isset($rule['methods']) && is_array($rule['methods'])) {
                 $this->deprecationRules[$class]['methods'] = array_merge(
                     $this->deprecationRules[$class]['methods'],
@@ -56,12 +54,10 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
                 );
             }
 
-            // Поддержка формата: ['class' => ..., 'method' => ..., 'message' => ...]
             if (isset($rule['method'], $rule['message'])) {
                 $this->deprecationRules[$class]['methods'][$rule['method']] = $rule['message'];
             }
 
-            // Поддержка формата: ['class' => ..., 'property' => ..., 'message' => ...]
             if (isset($rule['property'], $rule['message'])) {
                 $this->deprecationRules[$class]['properties'][$rule['property']] = $rule['message'];
             }
@@ -86,13 +82,11 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
 
         $changed = false;
 
-        // Проверяем все родительские классы
         foreach ($this->deprecationRules as $baseClass => $rules) {
             if (! $this->isClassOrSubclass($className, $baseClass)) {
                 continue;
             }
 
-            // Обрабатываем свойства
             if (! empty($rules['properties'])) {
                 foreach ($node->getProperties() as $property) {
                     $propertyName = $this->getName($property);
@@ -106,7 +100,6 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
                 }
             }
 
-            // Обрабатываем методы
             if (! empty($rules['methods'])) {
                 foreach ($node->getMethods() as $method) {
                     $methodName = $this->getName($method);
@@ -129,23 +122,20 @@ final class AddDeprecatedDocToMembersRector extends AbstractRector implements Co
      */
     private function addDeprecatedDoc(Node $node, string $message): bool
     {
-        // Проверяем, есть ли уже @deprecated
         $docComment = $node->getDocComment();
 
         if ($docComment instanceof Doc) {
             $text = $docComment->getText();
             if (str_contains($text, '@deprecated')) {
-                return false; // Уже есть @deprecated, ничего не делаем
+                return false;
             }
 
-            // Добавляем @deprecated к существующему PHPDoc
             $lines = explode("\n", $text);
             $lastLine = array_pop($lines);
             $lines[] = '     * @deprecated ' . $message;
             $lines[] = $lastLine;
             $newDoc = implode("\n", $lines);
         } else {
-            // Создаем новый PHPDoc
             $newDoc = "/**\n     * @deprecated {$message}\n     */";
         }
 

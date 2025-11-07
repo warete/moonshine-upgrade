@@ -15,6 +15,9 @@ use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\NullableType;
+use PhpParser\Node\UnionType;
 use PHPStan\Type\ObjectType;
 use Rector\Contract\Rector\ConfigurableRectorInterface;
 use Rector\NodeTypeResolver\NodeTypeResolver;
@@ -124,7 +127,7 @@ final class AddAsyncMethodAttributeRector extends AbstractRector implements Conf
         }
 
         return $this->isName($typeNode, ltrim($fqcn, '\\'))
-            || $this->isName($typeNode, '\\' . ltrim($fqcn, '\\')); // на всякий случай
+            || $this->isName($typeNode, '\\' . ltrim($fqcn, '\\'));
     }
 
     private function collectAsyncMethodNames(Class_ $class): array
@@ -300,3 +303,4 @@ final class AddAsyncMethodAttributeRector extends AbstractRector implements Conf
         return false;
     }
 }
+

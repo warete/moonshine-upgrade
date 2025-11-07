@@ -90,14 +90,11 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
         $classReflection = $this->reflectionProvider->getClass($className);
         $changed = false;
 
-        // Проверяем каждое правило
         foreach ($this->signatureChanges as $baseClass => $methods) {
-            // Проверяем использует ли класс трейт или наследуется от класса
             if (!$this->classUsesTraitOrExtendsClass($classReflection, $baseClass)) {
                 continue;
             }
 
-            // Обрабатываем методы в текущем классе
             foreach ($node->getMethods() as $method) {
                 $methodName = $this->getName($method);
                 if ($methodName === null || !isset($methods[$methodName])) {
@@ -114,14 +111,10 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
         return $changed ? $node : null;
     }
 
-    /**
-     * Проверяет использует ли класс трейт или наследуется от класса (рекурсивно через всю цепочку)
-     */
     private function classUsesTraitOrExtendsClass(ClassReflection $classReflection, string $baseClassOrTrait): bool
     {
         $baseClassOrTrait = ltrim($baseClassOrTrait, '\\');
 
-        // Прямое совпадение
         if ($classReflection->getName() === $baseClassOrTrait) {
             return true;
         }
@@ -132,35 +125,27 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
 
         $baseReflection = $this->reflectionProvider->getClass($baseClassOrTrait);
 
-        // Если базовый класс - это трейт
         if ($baseReflection->isTrait()) {
             return $this->classUsesTraitRecursively($classReflection, $baseClassOrTrait);
         }
 
-        // Если базовый класс - это класс или интерфейс
         return $classReflection->isSubclassOf($baseReflection->getName());
     }
 
-    /**
-     * Рекурсивно проверяет использует ли класс трейт (включая родительские классы и трейты внутри трейтов)
-     */
     private function classUsesTraitRecursively(ClassReflection $classReflection, string $traitName): bool
     {
         $traitName = ltrim($traitName, '\\');
 
-        // Проверяем прямое использование трейта
         foreach ($classReflection->getTraits() as $trait) {
             if ($trait->getName() === $traitName) {
                 return true;
             }
 
-            // Рекурсивно проверяем трейты внутри трейтов
             if ($this->classUsesTraitRecursively($trait, $traitName)) {
                 return true;
             }
         }
 
-        // Проверяем родительские классы
         $parentClass = $classReflection->getParentClass();
         if ($parentClass !== null && $parentClass !== false) {
             return $this->classUsesTraitRecursively($parentClass, $traitName);
@@ -176,7 +161,6 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
     {
         $changed = false;
 
-        // Изменяем типы параметров
         if (isset($signature['params'])) {
             foreach ($signature['params'] as $index => $newType) {
                 if (!isset($method->params[$index])) {
@@ -193,7 +177,6 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
             }
         }
 
-        // Изменяем тип возвращаемого значения
         if (isset($signature['return'])) {
             $newReturnType = $this->createTypeNode($signature['return']);
 
@@ -208,13 +191,11 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
 
     private function createTypeNode(string $type): Identifier|Name|ComplexType|null
     {
-        // Обработка nullable типов
         if (str_starts_with($type, '?')) {
             $innerType = $this->createTypeNode(substr($type, 1));
             return $innerType !== null ? new NullableType($innerType) : null;
         }
 
-        // Обработка union типов
         if (str_contains($type, '|')) {
             $types = array_map('trim', explode('|', $type));
             $typeNodes = [];
@@ -227,13 +208,11 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
             return !empty($typeNodes) ? new UnionType($typeNodes) : null;
         }
 
-        // Скалярные типы
         $scalarTypes = ['string', 'int', 'bool', 'float', 'array', 'object', 'mixed', 'void', 'never', 'null', 'true', 'false'];
         if (in_array(strtolower($type), $scalarTypes, true)) {
             return new Identifier(strtolower($type));
         }
 
-        // Класс/интерфейс
         return new FullyQualified($type);
     }
 
