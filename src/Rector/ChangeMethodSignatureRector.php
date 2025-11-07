@@ -37,14 +37,14 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
     public function configure(array $configuration): void
     {
         foreach ($configuration as $rule) {
-            if (!is_array($rule) || !isset($rule['class'], $rule['method'])) {
+            if (! is_array($rule) || ! isset($rule['class'], $rule['method'])) {
                 continue;
             }
 
-            $class = ltrim((string) $rule['class'], '\\');
-            $method = (string) $rule['method'];
+            $class = ltrim($rule['class'], '\\');
+            $method = $rule['method'];
 
-            if (!isset($this->signatureChanges[$class])) {
+            if (! isset($this->signatureChanges[$class])) {
                 $this->signatureChanges[$class] = [];
             }
 
@@ -58,10 +58,10 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
             }
 
             if (isset($rule['return'])) {
-                $signature['return'] = ltrim((string) $rule['return'], '\\');
+                $signature['return'] = ltrim($rule['return'], '\\');
             }
 
-            if (!empty($signature)) {
+            if ($signature !== []) {
                 $this->signatureChanges[$class][$method] = $signature;
             }
         }
@@ -74,7 +74,7 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
 
     public function refactor(Node $node): ?Node
     {
-        if (!$node instanceof Class_) {
+        if (! $node instanceof Class_) {
             return null;
         }
 
@@ -83,7 +83,7 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
             return null;
         }
 
-        if (!$this->reflectionProvider->hasClass($className)) {
+        if (! $this->reflectionProvider->hasClass($className)) {
             return null;
         }
 
@@ -91,13 +91,13 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
         $changed = false;
 
         foreach ($this->signatureChanges as $baseClass => $methods) {
-            if (!$this->classUsesTraitOrExtendsClass($classReflection, $baseClass)) {
+            if (! $this->classUsesTraitOrExtendsClass($classReflection, $baseClass)) {
                 continue;
             }
 
             foreach ($node->getMethods() as $method) {
                 $methodName = $this->getName($method);
-                if ($methodName === null || !isset($methods[$methodName])) {
+                if ($methodName === null || ! isset($methods[$methodName])) {
                     continue;
                 }
 
@@ -119,7 +119,7 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
             return true;
         }
 
-        if (!$this->reflectionProvider->hasClass($baseClassOrTrait)) {
+        if (! $this->reflectionProvider->hasClass($baseClassOrTrait)) {
             return false;
         }
 
@@ -147,7 +147,7 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
         }
 
         $parentClass = $classReflection->getParentClass();
-        if ($parentClass !== null && $parentClass !== false) {
+        if ($parentClass instanceof ClassReflection && $parentClass !== false) {
             return $this->classUsesTraitRecursively($parentClass, $traitName);
         }
 
@@ -163,7 +163,7 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
 
         if (isset($signature['params'])) {
             foreach ($signature['params'] as $index => $newType) {
-                if (!isset($method->params[$index])) {
+                if (! isset($method->params[$index])) {
                     continue;
                 }
 
@@ -193,11 +193,12 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
     {
         if (str_starts_with($type, '?')) {
             $innerType = $this->createTypeNode(substr($type, 1));
+
             return $innerType !== null ? new NullableType($innerType) : null;
         }
 
         if (str_contains($type, '|')) {
-            $types = array_map('trim', explode('|', $type));
+            $types = array_map(trim(...), explode('|', $type));
             $typeNodes = [];
             foreach ($types as $t) {
                 $node = $this->createTypeNode($t);
@@ -205,7 +206,8 @@ final class ChangeMethodSignatureRector extends AbstractRector implements Config
                     $typeNodes[] = $node;
                 }
             }
-            return !empty($typeNodes) ? new UnionType($typeNodes) : null;
+
+            return $typeNodes === [] ? null : new UnionType($typeNodes);
         }
 
         $scalarTypes = ['string', 'int', 'bool', 'float', 'array', 'object', 'mixed', 'void', 'never', 'null', 'true', 'false'];

@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Warete\MoonshineUpgrade\Rector;
 
+use MoonShine\Laravel\Pages\Page;
+use MoonShine\Laravel\Resources\ModelResource;
 use PhpParser\Node;
 use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\Stmt\UseUse;
 use PHPStan\Reflection\ReflectionProvider;
 use Rector\Rector\AbstractRector;
 use Rector\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -19,8 +24,8 @@ final class ImportShortClassReferencesRector extends AbstractRector
      * @var array<string> List of parent classes/interfaces to check against
      */
     private array $parentClasses = [
-        'MoonShine\\Laravel\\Resources\\ModelResource',
-        'MoonShine\\Laravel\\Pages\\Page',
+        ModelResource::class,
+        Page::class,
         'MoonShine\\Crud\\Resources\\CrudResource',
     ];
 
@@ -41,11 +46,11 @@ final class ImportShortClassReferencesRector extends AbstractRector
         }
 
         $currentClass = $this->findClassInNamespace($node);
-        if ($currentClass === null) {
+        if (! $currentClass instanceof Class_) {
             return null;
         }
 
-        if ($currentClass->name === null) {
+        if (! $currentClass->name instanceof Identifier) {
             return null;
         }
 
@@ -59,7 +64,7 @@ final class ImportShortClassReferencesRector extends AbstractRector
 
         $classesToImport = [];
 
-        $this->traverseNodesWithCallable($node->stmts, function (Node $subNode) use ($currentNamespace, &$classesToImport) {
+        $this->traverseNodesWithCallable($node->stmts, function (Node $subNode) use ($currentNamespace, &$classesToImport): null {
             if (! $subNode instanceof ClassConstFetch) {
                 return null;
             }
@@ -88,28 +93,26 @@ final class ImportShortClassReferencesRector extends AbstractRector
                 $classNamespace = implode('\\', $parts);
             }
 
-            if ($classNamespace !== $currentNamespace && !empty($classNamespace)) {
+            if ($classNamespace !== $currentNamespace && ($classNamespace !== '' && $classNamespace !== '0')) {
                 return null;
             }
 
-            $possibleFqcn = empty($classNamespace) ? $currentNamespace . '\\' . $shortClassName : $className;
+            $possibleFqcn = $classNamespace === '' || $classNamespace === '0' ? $currentNamespace . '\\' . $shortClassName : $className;
 
-            if ($this->reflectionProvider->hasClass($possibleFqcn)) {
-                if ($this->isTargetClass($possibleFqcn)) {
-                    $classesToImport[$shortClassName] = $possibleFqcn;
-                }
+            if ($this->reflectionProvider->hasClass($possibleFqcn) && $this->isTargetClass($possibleFqcn)) {
+                $classesToImport[$shortClassName] = $possibleFqcn;
             }
 
             return null;
         });
 
-        if (empty($classesToImport)) {
+        if ($classesToImport === []) {
             return null;
         }
 
         $existingImports = [];
         foreach ($node->stmts as $stmt) {
-            if ($stmt instanceof Node\Stmt\Use_) {
+            if ($stmt instanceof Use_) {
                 foreach ($stmt->uses as $use) {
                     $alias = $use->alias ? $use->alias->toString() : $use->name->getLast();
                     $existingImports[$alias] = $use->name->toString();
@@ -125,13 +128,14 @@ final class ImportShortClassReferencesRector extends AbstractRector
                 if ($existingImports[$shortName] !== ltrim($fqcn, '\\')) {
                     continue;
                 }
+
                 continue;
             }
 
-            $newUseStatements[] = new Node\Stmt\Use_([
-                new Node\Stmt\UseUse(
+            $newUseStatements[] = new Use_([
+                new UseUse(
                     new Name(ltrim($fqcn, '\\'))
-                )
+                ),
             ]);
 
             $changed = true;
@@ -142,16 +146,12 @@ final class ImportShortClassReferencesRector extends AbstractRector
             $lastUsePosition = -1;
 
             foreach ($node->stmts as $i => $stmt) {
-                if ($stmt instanceof Node\Stmt\Use_) {
+                if ($stmt instanceof Use_) {
                     $lastUsePosition = $i;
                 }
             }
 
-            if ($lastUsePosition >= 0) {
-                $insertPosition = $lastUsePosition + 1;
-            } else {
-                $insertPosition = 0;
-            }
+            $insertPosition = $lastUsePosition >= 0 ? $lastUsePosition + 1 : 0;
 
             array_splice($node->stmts, $insertPosition, 0, $newUseStatements);
         }
@@ -178,7 +178,7 @@ final class ImportShortClassReferencesRector extends AbstractRector
             return false;
         }
 
-        if (empty($this->parentClasses)) {
+        if ($this->parentClasses === []) {
             return true;
         }
 

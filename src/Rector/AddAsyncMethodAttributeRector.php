@@ -11,12 +11,12 @@ use PhpParser\Node\AttributeGroup;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Identifier;
 use PhpParser\Node\Name\FullyQualified;
+use PhpParser\Node\NullableType;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\Identifier;
-use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
 use PHPStan\Type\ObjectType;
 use Rector\Contract\Rector\ConfigurableRectorInterface;
@@ -303,4 +303,3 @@ final class AddAsyncMethodAttributeRector extends AbstractRector implements Conf
         return false;
     }
 }
-
