@@ -137,6 +137,7 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->rule(\Warete\MoonshineUpgrade\Rector\MoonShineConfigUpdateRule::class);
     $rectorConfig->removeUnusedImports();
+    $rectorConfig->rule(\Warete\MoonshineUpgrade\Rector\ImportShortClassReferencesRector::class);
     $rectorConfig->importNames();
     $rectorConfig->importShortClasses();
 };
