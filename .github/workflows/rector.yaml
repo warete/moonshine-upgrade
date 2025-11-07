@@ -1,6 +1,10 @@
 # github action that checks code with Rector
 name: Rector
 
+# Allow this workflow to use the GITHUB_TOKEN for pushing changes
+permissions:
+    contents: write
+
 on: [push]
 
 jobs:
@@ -12,6 +16,12 @@ jobs:
                 with:
                     # Must be used to trigger workflow after push
                     token: ${{ secrets.GITHUB_TOKEN }}
+                    # Ensure the checkout persists the credentials so later
+                    # git push operations (used by git-auto-commit-action)
+                    # can authenticate.
+                    persist-credentials: true
+                    # fetch full history so branch operations are safe
+                    fetch-depth: 0
 
             -
                 uses: shivammathur/setup-php@v2
