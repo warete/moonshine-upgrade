@@ -19,6 +19,7 @@ use Warete\MoonshineUpgrade\Utils\PHPActor;
 
 class V4 implements VersionStrategy
 {
+    public $core;
     use WithCore;
 
     public function __construct(
