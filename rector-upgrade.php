@@ -73,6 +73,7 @@ return static function (RectorConfig $rectorConfig): void {
             'MoonShine\\Laravel\\MoonShineRequest' => 'MoonShine\\Contracts\\Core\\DependencyInjection\\CrudRequestContract',
             'MoonShine\\Laravel\\Http\\Responses\\MoonShineJsonResponse' => 'MoonShine\\Crud\\JsonResponse',
             'MoonShine\\Laravel\\Enums\\Action' => 'MoonShine\\Support\\Enums\\Action',
+            'MoonShine\\Laravel\\Enums\\Ability' => 'MoonShine\\Support\\Enums\\Ability',
             'MoonShine\Laravel\Traits\WithComponentsPusher' => 'MoonShine\\Crud\\Traits\\WithComponentsPusher',
             'MoonShine\\Laravel\\Layouts\\CompactLayout' => 'MoonShine\\Laravel\\Layouts\\AppLayout',
             'MoonShine\\Laravel\\Resources\\CrudResource' => 'MoonShine\\Crud\\Resources\\CrudResource',
