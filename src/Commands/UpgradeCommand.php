@@ -27,7 +27,7 @@ class UpgradeCommand extends MoonShineCommand
 
         $isDryRun = (bool)$this->option('dry-run');
 
-        intro('Starting MoonShine upgrade');
+        intro("Starting MoonShine upgrade to version {$version}");
 
         confirm('Are you sure you want to upgrade moonshine? This operation can change your files. Please make backup before continuing.', default: false, required: true);
 
