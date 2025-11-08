@@ -2,10 +2,12 @@
 
 namespace Warete\MoonshineUpgrade\VersionStrategies;
 
+use App\MoonShine\Resources\Car\CarResource;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
+use MoonShine\Contracts\Core\ResourcesContract;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
@@ -27,8 +29,10 @@ class V4 implements VersionStrategy
 
     public function __construct(
         protected bool $isDryRun,
+        protected string $baseDir,
         protected ?Command $command = null,
     ) {
+        $this->baseDir = rtrim($this->baseDir, '/');
         $this->core = $this->getCore();
     }
 
@@ -38,7 +42,7 @@ class V4 implements VersionStrategy
             $basePath = base_path();
             $rectorDryRun = $this->isDryRun ? ' --dry-run || exit 0' : '';
             $process = Process::command(
-                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun}"
+                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun} {$this->baseDir}"
             );
             $process->timeout(120);
 
@@ -51,7 +55,7 @@ class V4 implements VersionStrategy
         }
 
         /** @var Resources $resources */
-        $resources = $this->core->getResources();
+        $resources = $this->filterResourcesByBaseDir($this->core->getResources());
 
         info('Upgrading resources and pages');
         progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
@@ -141,5 +145,15 @@ class V4 implements VersionStrategy
 
             return false;
         }
+    }
+
+    protected function filterResourcesByBaseDir(ResourcesContract $resources): Resources
+    {
+        return Resources::make($resources)->filter(function (ResourceContract $resource): bool {
+            $rResource = new ReflectionClass($resource);
+            $classFilePath = $rResource->getFileName();
+
+            return str($classFilePath)->lower()->startsWith(str($this->baseDir)->lower()->value());
+        });
     }
 }
