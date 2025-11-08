@@ -58,7 +58,6 @@ class V4 implements VersionStrategy
             $progress
                 ->label("Upgrading resource: {$resource->getTitle()}");
             $this->upgradeResource($resource, $progress);
-            sleep(1);
         });
     }
 
