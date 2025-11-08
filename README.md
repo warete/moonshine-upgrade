@@ -20,7 +20,7 @@ A small package that helps automate migration of a MoonShine application to a ne
 
 You can specify directory to upgrade by `--dir` option. For example: `php artisan moonshine:upgrade --dir=app/MoonShine/Resources`.
 
-The upgrade command can be executed repeatedly: it will update only irrelevant files.
+The upgrade command can be run multiple times — it will update only the outdated files.
 
 > **Note — manual follow-up required**
 >
