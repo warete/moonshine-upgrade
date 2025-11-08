@@ -77,6 +77,7 @@ return static function (RectorConfig $rectorConfig): void {
             'MoonShine\Laravel\Traits\WithComponentsPusher' => 'MoonShine\\Crud\\Traits\\WithComponentsPusher',
             'MoonShine\\Laravel\\Layouts\\CompactLayout' => 'MoonShine\\Laravel\\Layouts\\AppLayout',
             'MoonShine\\Laravel\\Resources\\CrudResource' => 'MoonShine\\Crud\\Resources\\CrudResource',
+            'MoonShine\\Laravel\\Contracts\\Notifications\\MoonShineNotificationContract' => 'MoonShine\\Crud\\Contracts\\Notifications\\MoonShineNotificationContract',
             #forms
             'MoonShine\\Laravel\\Forms\\FiltersForm' => 'MoonShine\\Crud\\Forms\\FiltersForm',
             'MoonShine\\Laravel\\Forms\\LoginForm' => 'MoonShine\\Crud\\Forms\\LoginForm',

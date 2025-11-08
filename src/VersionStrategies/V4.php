@@ -9,23 +9,29 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
 
+use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\ResourceContract;
+use MoonShine\Contracts\Core\ResourcesContract;
 use MoonShine\Core\Resources\Resources;
 use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
 
+/**
+ * @property ?CoreContract $core
+ */
 class V4 implements VersionStrategy
 {
-    public $core;
     use WithCore;
 
     public function __construct(
         protected bool $isDryRun,
+        protected string $baseDir,
         protected ?Command $command = null,
     ) {
+        $this->baseDir = rtrim($this->baseDir, '/');
         $this->core = $this->getCore();
     }
 
@@ -35,7 +41,7 @@ class V4 implements VersionStrategy
             $basePath = base_path();
             $rectorDryRun = $this->isDryRun ? ' --dry-run || exit 0' : '';
             $process = Process::command(
-                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun}"
+                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun} {$this->baseDir}"
             );
             $process->timeout(120);
 
@@ -48,14 +54,13 @@ class V4 implements VersionStrategy
         }
 
         /** @var Resources $resources */
-        $resources = $this->core->getResources();
+        $resources = $this->filterResourcesByBaseDir($this->core->getResources());
 
         info('Upgrading resources and pages');
         progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
             $progress
                 ->label("Upgrading resource: {$resource->getTitle()}");
             $this->upgradeResource($resource, $progress);
-            sleep(1);
         });
     }
 
@@ -70,16 +75,23 @@ class V4 implements VersionStrategy
         $classFilePath = $rResource->getFileName();
         $classFileName = basename($classFilePath);
         $classDir = dirname($rResource->getFileName());
-        $newClassDir = $classDir . DIRECTORY_SEPARATOR . $resourceName;
-        $newClassPath = $newClassDir . DIRECTORY_SEPARATOR . $classFileName;
+        $classDirName = basename($classDir);
 
-        $progress->hint("[{$resourceName}] Starting move resource class");
-        $moveResult = $this->moveClass($classFilePath, $newClassPath);
-
-        if ($moveResult) {
-            $progress->hint("[{$resourceName}] Resource was moved");
+        if ($classDirName == $resourceName) {
+            $progress->hint("[{$resourceName}] Resource already upgraded");
+            $newClassDir = $classDir;
         } else {
-            $this->command?->fail("\t[{$resourceName}] Failed to move resource");
+            $newClassDir = $classDir . DIRECTORY_SEPARATOR . $resourceName;
+            $newClassPath = $newClassDir . DIRECTORY_SEPARATOR . $classFileName;
+
+            $progress->hint("[{$resourceName}] Starting move resource class");
+            $moveResult = $this->moveClass($classFilePath, $newClassPath);
+
+            if ($moveResult) {
+                $progress->hint("[{$resourceName}] Resource was moved");
+            } else {
+                $this->command?->fail("\t[{$resourceName}] Failed to move resource");
+            }
         }
 
         $progress->hint("[{$resourceName}] Starting upgrade resource pages");
@@ -103,12 +115,19 @@ class V4 implements VersionStrategy
             return;
         }
 
+        if ($newClassPath == $classFilePath) {
+            $progress->hint("[{$pageName}] Page already upgraded");
+
+            return;
+        }
+
         $progress->hint("[{$pageName}] Starting move page class");
         $moveResult = $this->moveClass($classFilePath, $newClassPath);
         if ($moveResult) {
             $progress->hint("[{$pageName}] Page was moved");
         } else {
-            $this->command?->fail("[{$pageName}] Failed to move page");
+            $moveError = $moveResult->output();
+            $this->command?->fail("[{$pageName}] Failed to move page: {$moveError}");
         }
     }
 
@@ -122,9 +141,19 @@ class V4 implements VersionStrategy
 
             return true;
         } catch (Throwable $e) {
-            $this->command?->error(\sprintf('Failed to move class `%s`: %s', $from, $e->getMessage()));
+            $this->command?->fail(\sprintf('Failed to move class `%s`: %s', $from, $e->getMessage()));
 
             return false;
         }
+    }
+
+    protected function filterResourcesByBaseDir(ResourcesContract $resources): Resources
+    {
+        return Resources::make($resources)->filter(function (ResourceContract $resource): bool {
+            $rResource = new ReflectionClass($resource);
+            $classFilePath = $rResource->getFileName();
+
+            return str($classFilePath)->lower()->startsWith(str($this->baseDir)->lower()->value());
+        });
     }
 }

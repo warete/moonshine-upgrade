@@ -10,12 +10,17 @@ class PHPActor
 {
     protected string $PHPActorPath;
 
+    public function __construct()
+    {
+        $this->PHPActorPath = base_path('vendor' . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'phpactor.phar');
+    }
+
     public function moveClass(string $from, string $to): void
     {
         $this->checkAndDownloadExecutable();
 
         $process = Process::command(
-            "php ./vendor/warete/moonshine-upgrade/phpactor.phar class:move -n {$from} {$to}"
+            "php {$this->PHPActorPath} class:move -n {$from} {$to}"
         );
         $process->timeout(60);
 
@@ -28,14 +33,13 @@ class PHPActor
 
     protected function checkAndDownloadExecutable(): void
     {
-        $this->PHPActorPath = base_path('vendor' . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'phpactor.phar');
 
         if (File::exists($this->PHPActorPath)) {
             return;
         }
 
         $process = Process::command(
-            'curl -Lo ' . $this->PHPActorPath . ' https://github.com/phpactor/phpactor/releases/latest/download/phpactor.phar'
+            "curl -Lo {$this->PHPActorPath} https://github.com/phpactor/phpactor/releases/latest/download/phpactor.phar"
         );
         $processOutput = $process->run();
 

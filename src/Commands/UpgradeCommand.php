@@ -3,6 +3,7 @@
 namespace Warete\MoonshineUpgrade\Commands;
 
 use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\outro;
 
@@ -15,7 +16,7 @@ class UpgradeCommand extends MoonShineCommand
 {
     protected Factory $upgradeFactory;
 
-    protected $signature = 'moonshine:upgrade {version=4} {--dry-run}';
+    protected $signature = 'moonshine:upgrade {version=4} {--dry-run} {--dir=}';
 
     protected $description = 'Upgrade moonshine';
 
@@ -27,12 +28,20 @@ class UpgradeCommand extends MoonShineCommand
 
         $isDryRun = (bool)$this->option('dry-run');
 
-        intro('Starting MoonShine upgrade');
+        $dir = match ($this->option('dir')) {
+            '.', '/', './' => '',
+            default => $this->option('dir'),
+        };
+        $baseDir = base_path($dir);
+
+        intro("Starting MoonShine upgrade to version {$version}");
+
+        info("Running in directory {$baseDir}");
 
         confirm('Are you sure you want to upgrade moonshine? This operation can change your files. Please make backup before continuing.', default: false, required: true);
 
 
-        $versionStrategy = $this->upgradeFactory->getByVersion($version, $isDryRun, $this);
+        $versionStrategy = $this->upgradeFactory->getByVersion($version, $isDryRun, $baseDir, $this);
 
         $versionStrategy();
 

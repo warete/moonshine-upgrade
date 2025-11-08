@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\Class_\CompleteDynamicPropertiesRector;
 use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\CodeQuality\Rector\If_\ExplicitBoolCompareRector;
 use Rector\Config\RectorConfig;
@@ -23,7 +24,7 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/tests',
         ExplicitBoolCompareRector::class,
         FirstClassCallableRector::class,
-
+        CompleteDynamicPropertiesRector::class => __DIR__ . '/src/VersionStrategies/V4.php',
     ]);
 
     $rectorConfig->importNames();
