@@ -14,10 +14,13 @@ A small package that helps automate migration of a MoonShine application to a ne
 **Make this before upgrade moonshine version in `composer.json`:**
 
 1. `composer require --dev warete/moonshine-upgrade`
-3. `php artisan vendor:publish --provider="Warete\MoonshineUpgrade\Providers\MoonshineUpgradeServiceProvider"`
-4. `php artisan moonshine:upgrade <version>`. By default will used last available version.
+2. `php artisan vendor:publish --provider="Warete\MoonshineUpgrade\Providers\MoonshineUpgradeServiceProvider"`
+3. `php artisan moonshine:upgrade <version>`. By default will used last available version.
+4. Then upgrade moonshine version in `composer.json` and run `composer update`!
 
-Then upgrade moonshine version in `composer.json` and run `composer update`!
+You can specify directory to upgrade by `--dir` option. For example: `php artisan moonshine:upgrade --dir=app/MoonShine/Resources`.
+
+The upgrade command can be run multiple times — it will update only the outdated files.
 
 > **Note — manual follow-up required**
 >
@@ -31,5 +34,6 @@ Then upgrade moonshine version in `composer.json` and run `composer update`!
   - Resources and their pages will be adapted to the new structure.
   - The `config/moonshine.php` configuration will be updated to support the latest features.
 
-Note: the script performs automated edits to your codebase — files will be changed, and some files may be moved, renamed or removed by the upgrade process. Always make a backup (or use VCS) before running the upgrade. You can use the command option `--dry-run` to preview changes without writing files.
-
+> **Warning**
+>
+>The script performs automated edits to your codebase — files will be changed, and some files may be moved, renamed or removed by the upgrade process. Always make a backup (or use VCS) before running the upgrade. You can use the command option `--dry-run` to preview changes without writing files.
