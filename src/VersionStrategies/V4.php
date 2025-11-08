@@ -2,18 +2,17 @@
 
 namespace Warete\MoonshineUpgrade\VersionStrategies;
 
-use App\MoonShine\Resources\Car\CarResource;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
-use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
-use MoonShine\Contracts\Core\ResourcesContract;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
 
+use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\ResourceContract;
+use MoonShine\Contracts\Core\ResourcesContract;
 use MoonShine\Core\Resources\Resources;
 use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
@@ -118,6 +117,7 @@ class V4 implements VersionStrategy
 
         if ($newClassPath == $classFilePath) {
             $progress->hint("[{$pageName}] Page already upgraded");
+
             return;
         }
 
