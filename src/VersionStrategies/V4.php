@@ -72,16 +72,23 @@ class V4 implements VersionStrategy
         $classFilePath = $rResource->getFileName();
         $classFileName = basename($classFilePath);
         $classDir = dirname($rResource->getFileName());
-        $newClassDir = $classDir . DIRECTORY_SEPARATOR . $resourceName;
-        $newClassPath = $newClassDir . DIRECTORY_SEPARATOR . $classFileName;
+        $classDirName = basename($classDir);
 
-        $progress->hint("[{$resourceName}] Starting move resource class");
-        $moveResult = $this->moveClass($classFilePath, $newClassPath);
-
-        if ($moveResult) {
-            $progress->hint("[{$resourceName}] Resource was moved");
+        if ($classDirName == $resourceName) {
+            $progress->hint("[{$resourceName}] Resource already upgraded");
+            $newClassDir = $classDir;
         } else {
-            $this->command?->fail("\t[{$resourceName}] Failed to move resource");
+            $newClassDir = $classDir . DIRECTORY_SEPARATOR . $resourceName;
+            $newClassPath = $newClassDir . DIRECTORY_SEPARATOR . $classFileName;
+
+            $progress->hint("[{$resourceName}] Starting move resource class");
+            $moveResult = $this->moveClass($classFilePath, $newClassPath);
+
+            if ($moveResult) {
+                $progress->hint("[{$resourceName}] Resource was moved");
+            } else {
+                $this->command?->fail("\t[{$resourceName}] Failed to move resource");
+            }
         }
 
         $progress->hint("[{$resourceName}] Starting upgrade resource pages");
@@ -102,6 +109,11 @@ class V4 implements VersionStrategy
         $classFileName = basename($classFilePath);
         $newClassPath = $resourceDir . DIRECTORY_SEPARATOR . 'Pages' . DIRECTORY_SEPARATOR . $classFileName;
         if (str_starts_with($pageFullNameOld, 'MoonShine\\Laravel\\Pages\\Crud')) {
+            return;
+        }
+
+        if ($newClassPath == $classFilePath) {
+            $progress->hint("[{$pageName}] Page already upgraded");
             return;
         }
 
