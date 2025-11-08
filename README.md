@@ -13,11 +13,9 @@ A small package that helps automate migration of a MoonShine application to a ne
 
 **Make this before upgrade moonshine version in `composer.json`:**
 
-1. `composer require warete/moonshine-upgrade`
-2. Add `Warete\MoonshineUpgrade\Providers\MoonshineUpgradeServiceProvider::class` to `bootstrap/providers.php`
+1. `composer require --dev warete/moonshine-upgrade`
 3. `php artisan vendor:publish --provider="Warete\MoonshineUpgrade\Providers\MoonshineUpgradeServiceProvider"`
-4. `php artisan moonshine:upgrade <version>`. Available versions: `4`
-5. Add `Warete\MoonshineUpgrade\Providers\MoonshineUpgradeServiceProvider::class` from `bootstrap/providers.php`
+4. `php artisan moonshine:upgrade <version>`. By default will used last available version.
 
 Then upgrade moonshine version in `composer.json` and run `composer update`!
 
