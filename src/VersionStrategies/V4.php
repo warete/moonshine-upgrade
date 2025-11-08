@@ -5,6 +5,7 @@ namespace Warete\MoonshineUpgrade\VersionStrategies;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
+use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
@@ -17,9 +18,11 @@ use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
 
+/**
+ * @property ?CoreContract $core
+ */
 class V4 implements VersionStrategy
 {
-    public $core;
     use WithCore;
 
     public function __construct(
@@ -108,7 +111,8 @@ class V4 implements VersionStrategy
         if ($moveResult) {
             $progress->hint("[{$pageName}] Page was moved");
         } else {
-            $this->command?->fail("[{$pageName}] Failed to move page");
+            $moveError = $moveResult->output();
+            $this->command?->fail("[{$pageName}] Failed to move page: {$moveError}");
         }
     }
 
@@ -122,7 +126,7 @@ class V4 implements VersionStrategy
 
             return true;
         } catch (Throwable $e) {
-            $this->command?->error(\sprintf('Failed to move class `%s`: %s', $from, $e->getMessage()));
+            $this->command?->fail(\sprintf('Failed to move class `%s`: %s', $from, $e->getMessage()));
 
             return false;
         }
