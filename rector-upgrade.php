@@ -16,6 +16,69 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/vendor',
     ]);
 
+    $rectorConfig->ruleWithConfiguration(\Warete\MoonshineUpgrade\Rector\AddDeprecatedDocToMembersRector::class, [
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'property'=> 'clickAction',
+            'message' => '4.x: Property removed; Modify `TableBuilder` component in resource `IndexPage` via `modifyListComponent()`.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'indexButtons',
+            'message' => '4.x: Method removed; Use `buttons()` in resource `IndexPage`.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'topButtons',
+            'message' => '4.x: Method removed; Use `topLeftButtons()` or `topRightButtons()` in resource pages.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'handlers',
+            'message' => '4.x: Method removed; Use `handlers()` in resource pages.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'metrics',
+            'message' => '4.x: Method removed; Use `metrics()` in resource Index page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'modifyFormComponent',
+            'message' => '4.x: Method removed; Use `modifyFormComponent()` in resource Form page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'thead',
+            'message' => '4.x: Method removed.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'tbody',
+            'message' => '4.x: Method removed.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'tfoot',
+            'message' => '4.x: Method removed.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'modifyListComponent',
+            'message' => '4.x: Method removed; Use `modifyListComponent()` in resource Index page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'queryTags',
+            'message' => '4.x: Method deprecated and will be removed in v5.x; Use `queryTags()` in resource Index page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'filters',
+            'message' => '4.x: Method deprecated and will be removed in v5.x; Use `filters()` in resource Index page.',
+        ],
+    ]);
+
     $rectorConfig->ruleWithConfiguration(\Warete\MoonshineUpgrade\Rector\ChangeMethodSignatureRector::class, [
         [
             'class' => 'MoonShine\\Laravel\\Traits\\Resource\\ResourceEvents',
@@ -117,25 +180,6 @@ return static function (RectorConfig $rectorConfig): void {
             'swap'       => [0, 1],
         ],
     ]);
-
-    $rectorConfig->ruleWithConfiguration(\Warete\MoonshineUpgrade\Rector\AddDeprecatedDocToMembersRector::class, [
-        [
-            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
-            'property'=> 'clickAction',
-            'message' => '4.x: Property removed; Modify `TableBuilder` component in resource `IndexPage` via `modifyListComponent()`.',
-        ],
-        [
-            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
-            'method'=> 'indexButtons',
-            'message' => '4.x: Method removed; Use `buttons()` in resource `IndexPage`.',
-        ],
-        [
-            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
-            'method'=> 'topButtons',
-            'message' => '4.x: Method removed; Use `topLeftButtons()` or `topRightButtons()` in resource pages.',
-        ],
-    ]);
-
 
     $rectorConfig->rule(\Warete\MoonshineUpgrade\Rector\MoonShineConfigUpdateRule::class);
     $rectorConfig->removeUnusedImports();
