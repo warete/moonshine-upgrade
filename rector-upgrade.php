@@ -49,6 +49,16 @@ return static function (RectorConfig $rectorConfig): void {
         ],
         [
             'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'formButtons',
+            'message' => '4.x: Method removed; Use `buttons()` in resource Form page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
+            'method'=> 'formBuilderButtons',
+            'message' => '4.x: Method removed; Use `formButtons()` in resource Form page.',
+        ],
+        [
+            'class'   => 'MoonShine\\Laravel\\Resources\\CrudResource',
             'method'=> 'thead',
             'message' => '4.x: Method removed.',
         ],
