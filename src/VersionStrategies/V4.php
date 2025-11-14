@@ -41,7 +41,13 @@ class V4 implements VersionStrategy
             $basePath = base_path();
             $rectorDryRun = $this->isDryRun ? ' --dry-run || exit 0' : '';
             $process = Process::command(
-                "./vendor/bin/rector --config {$basePath}/rector-upgrade.php --clear-cache -vv{$rectorDryRun} {$this->baseDir}"
+                \sprintf(
+                    './vendor/bin/rector --config %s/rector-upgrade.php --clear-cache %s %s%s',
+                    $basePath,
+                    $this->isDryRun ? '--dry-run' : '',
+                    $this->baseDir,
+                    $this->isDryRun ? ' || exit 0' : ''
+                )
             );
             $process->timeout(120);
 
@@ -50,7 +56,7 @@ class V4 implements VersionStrategy
         if ($processOutput->successful()) {
             info('Successfully upgraded by rector');
         } else {
-            $this->command?->fail(\sprintf('Failed to upgrade by rector: %s', $processOutput->output()));
+            $this->command?->fail(\sprintf("Failed to upgrade by rector: %s\n\n%s", $processOutput->output(), $processOutput->errorOutput()));
         }
 
         /** @var Resources $resources */
