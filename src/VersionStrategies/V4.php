@@ -5,7 +5,9 @@ namespace Warete\MoonshineUpgrade\VersionStrategies;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use function Laravel\Prompts\info;
+use function Laravel\Prompts\note;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
 
@@ -18,6 +20,7 @@ use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
+use function Laravel\Prompts\warning;
 
 /**
  * @property ?CoreContract $core
@@ -37,12 +40,12 @@ class V4 implements VersionStrategy
 
     public function __invoke(): void
     {
+        $verbosityLevel = $this->command?->getOutput()->getVerbosity();
         $processOutput = spin(function () {
             $basePath = base_path();
-            $rectorDryRun = $this->isDryRun ? ' --dry-run || exit 0' : '';
             $process = Process::command(
                 \sprintf(
-                    './vendor/bin/rector --config %s/rector-upgrade.php --clear-cache %s %s%s',
+                    './vendor/bin/rector --config %s/rector-upgrade.php --clear-cache --output-format=json %s %s%s',
                     $basePath,
                     $this->isDryRun ? '--dry-run' : '',
                     $this->baseDir,
@@ -54,6 +57,28 @@ class V4 implements VersionStrategy
             return $process->run();
         }, 'Upgrade by rector in progress');
         if ($processOutput->successful()) {
+            try {
+                $rectorJsonOutput = json_decode($processOutput->output(), true);
+            } catch (Throwable $e) {
+                $rectorJsonOutput = [];
+                warning("Cannot parse rector result json: {$e->getMessage()}");
+            }
+
+            info("Changed files {$rectorJsonOutput['totals']['changed_files']}:");
+            if ($verbosityLevel == OutputInterface::VERBOSITY_NORMAL) {
+                foreach ($rectorJsonOutput['changed_files'] as $file) {
+                    info($file);
+                }
+            }
+
+            if ($verbosityLevel >= OutputInterface::VERBOSITY_VERBOSE) {
+                foreach ($rectorJsonOutput['file_diffs'] as $diff) {
+                    info("File: {$diff['file']}");
+                    note("{$diff['diff']}");
+                    note(str_repeat('=', 100));
+                }
+            }
+
             info('Successfully upgraded by rector');
         } else {
             $this->command?->fail(\sprintf("Failed to upgrade by rector: %s\n\n%s", $processOutput->output(), $processOutput->errorOutput()));
