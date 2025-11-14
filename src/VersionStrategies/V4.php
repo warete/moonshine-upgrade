@@ -5,11 +5,11 @@ namespace Warete\MoonshineUpgrade\VersionStrategies;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
-use Symfony\Component\Console\Output\OutputInterface;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\progress;
 use function Laravel\Prompts\spin;
+use function Laravel\Prompts\warning;
 
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\Core\PageContract;
@@ -18,9 +18,9 @@ use MoonShine\Contracts\Core\ResourcesContract;
 use MoonShine\Core\Resources\Resources;
 use MoonShine\Core\Traits\WithCore;
 use ReflectionClass;
+use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Warete\MoonshineUpgrade\Utils\PHPActor;
-use function Laravel\Prompts\warning;
 
 /**
  * @property ?CoreContract $core
