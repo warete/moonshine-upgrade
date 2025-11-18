@@ -63,7 +63,7 @@ class V4 implements VersionStrategy
 
             return $process->run();
         }, 'Upgrade by rector in progress');
-        if ($processOutput->successful() || (!$processOutput->successful() && $this->isDryRun)) {
+        if ($processOutput->successful() || (! $processOutput->successful() && $this->isDryRun)) {
             try {
                 $rectorJsonOutput = json_decode($processOutput->output(), true);
             } catch (Throwable $e) {
@@ -96,7 +96,7 @@ class V4 implements VersionStrategy
         $resources = $this->filterResourcesByBaseDir($this->core->getResources());
 
         info('Upgrading resources and pages');
-        
+
         if ($resources->isNotEmpty()) {
             progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
                 $progress

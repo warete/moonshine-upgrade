@@ -45,7 +45,7 @@ class PHPActor
 
         // Ensure directory exists
         $dir = dirname($this->PHPActorPath);
-        if (!File::isDirectory($dir)) {
+        if (! File::isDirectory($dir)) {
             File::makeDirectory($dir, 0755, true);
         }
 

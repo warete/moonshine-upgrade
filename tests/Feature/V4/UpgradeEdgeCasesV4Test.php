@@ -281,7 +281,7 @@ PHP;
         ]);
 
         $result->assertSuccessful();
-        
+
         // TODO: Test multiple runs when we can verify actual file changes
     }
 }

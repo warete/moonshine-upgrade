@@ -67,29 +67,29 @@ final class UpgradeV4Test extends TestCase
         // This test verifies the EXPECTED structure after upgrade
         // Actual file moving is done by MoonShine's resource discovery
         // We test that the expected V4 structure is correct
-        
+
         $v4BasePath = $this->fixturesPath . '/V4Expected/app/MoonShine/Resources';
-        
+
         // 1. ArticleResource.php should be in Article subdirectory
         $this->assertUpgradeFileExists($v4BasePath . '/Article/ArticleResource.php');
-        
+
         // 2. Namespace should be App\MoonShine\Resources\Article
         $this->assertFileContains(
             $v4BasePath . '/Article/ArticleResource.php',
             'namespace App\MoonShine\Resources\Article;'
         );
-        
+
         // 3. Pages should be in Article/Pages/
         $this->assertUpgradeFileExists($v4BasePath . '/Article/Pages/ArticleIndexPage.php');
         $this->assertUpgradeFileExists($v4BasePath . '/Article/Pages/ArticleFormPage.php');
         $this->assertUpgradeFileExists($v4BasePath . '/Article/Pages/ArticleDetailPage.php');
-        
+
         // 4. Page namespaces should be updated
         $this->assertFileContains(
             $v4BasePath . '/Article/Pages/ArticleIndexPage.php',
             'namespace App\MoonShine\Resources\Article\Pages;'
         );
-        
+
         // 5. Old structure should not exist in V4
         $this->assertFileDoesNotExist($this->fixturesPath . '/V4Expected/app/MoonShine/Resources/ArticleResource.php');
         $this->assertDirectoryDoesNotExist($this->fixturesPath . '/V4Expected/app/MoonShine/Pages/Article');

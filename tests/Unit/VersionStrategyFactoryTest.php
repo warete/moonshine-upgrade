@@ -6,9 +6,9 @@ namespace Warete\MoonshineUpgrade\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
+use Warete\MoonshineUpgrade\Tests\TestCase;
 use Warete\MoonshineUpgrade\VersionStrategies\Factory;
 use Warete\MoonshineUpgrade\VersionStrategies\V4;
-use Warete\MoonshineUpgrade\Tests\TestCase;
 
 final class VersionStrategyFactoryTest extends TestCase
 {

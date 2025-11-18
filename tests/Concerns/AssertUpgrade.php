@@ -101,6 +101,7 @@ trait AssertUpgrade
     protected function getFileContent(string $path): string
     {
         $this->assertUpgradeFileExists($path);
+
         return File::get($path);
     }
 
