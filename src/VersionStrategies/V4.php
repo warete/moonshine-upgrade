@@ -34,7 +34,7 @@ class V4 implements VersionStrategy
         protected string $baseDir,
         protected ?Command $command = null,
     ) {
-        $this->baseDir = rtrim($this->baseDir, '/');
+        $this->baseDir = rtrim($this->baseDir, '/\\');
         $this->core = $this->getCore();
     }
 
@@ -42,21 +42,26 @@ class V4 implements VersionStrategy
     {
         $verbosityLevel = $this->command?->getOutput()->getVerbosity();
         $processOutput = spin(function () {
-            $basePath = base_path();
-            $process = Process::command(
-                \sprintf(
-                    './vendor/bin/rector --config %s/rector-upgrade.php --clear-cache --output-format=json %s %s%s',
-                    $basePath,
-                    $this->isDryRun ? '--dry-run' : '',
-                    $this->baseDir,
-                    $this->isDryRun ? ' || exit 0' : ''
-                )
-            );
+            $rectorExecutablePath = base_path('vendor/bin/rector');
+            $rectorUpgradePath = base_path('rector-upgrade.php');
+            $command = [
+                PHP_BINARY,
+                $rectorExecutablePath,
+                '--config',
+                $rectorUpgradePath,
+                '--clear-cache',
+                '--output-format=json',
+                $this->baseDir,
+            ];
+            if ($this->isDryRun) {
+                $command[] = '--dry-run';
+            }
+            $process = Process::command($command);
             $process->timeout(120);
 
             return $process->run();
         }, 'Upgrade by rector in progress');
-        if ($processOutput->successful()) {
+        if ($processOutput->successful() || (!$processOutput->successful() && $this->isDryRun)) {
             try {
                 $rectorJsonOutput = json_decode($processOutput->output(), true);
             } catch (Throwable $e) {
@@ -184,7 +189,11 @@ class V4 implements VersionStrategy
             $rResource = new ReflectionClass($resource);
             $classFilePath = $rResource->getFileName();
 
-            return str($classFilePath)->lower()->startsWith(str($this->baseDir)->lower()->value());
+            // realpath() normalizes path separators automatically
+            $realClassPath = realpath($classFilePath) ?: $classFilePath;
+            $realBaseDir = realpath($this->baseDir) ?: $this->baseDir;
+
+            return str($realClassPath)->lower()->startsWith(str($realBaseDir)->lower()->value());
         });
     }
 }

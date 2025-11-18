@@ -19,9 +19,14 @@ class PHPActor
     {
         $this->checkAndDownloadExecutable();
 
-        $process = Process::command(
-            "php {$this->PHPActorPath} class:move -n {$from} {$to}"
-        );
+        $process = Process::command([
+            PHP_BINARY,
+            $this->PHPActorPath,
+            'class:move',
+            '-n',
+            $from,
+            $to,
+        ]);
         $process->timeout(60);
 
         $processOutput = $process->run();
@@ -38,15 +43,27 @@ class PHPActor
             return;
         }
 
-        $process = Process::command(
-            "curl -Lo {$this->PHPActorPath} https://github.com/phpactor/phpactor/releases/latest/download/phpactor.phar"
-        );
-        $processOutput = $process->run();
-
-        if (! $processOutput->successful()) {
-            throw new RuntimeException('Failed to download executable PHPActor: ' . $processOutput->errorOutput());
+        // Ensure directory exists
+        $dir = dirname($this->PHPActorPath);
+        if (!File::isDirectory($dir)) {
+            File::makeDirectory($dir, 0755, true);
         }
 
-        chmod($this->PHPActorPath, 0755);
+        // Download using file_get_contents for cross-platform compatibility
+        $url = 'https://github.com/phpactor/phpactor/releases/latest/download/phpactor.phar';
+        $content = @file_get_contents($url);
+
+        if ($content === false) {
+            throw new RuntimeException('Failed to download executable PHPActor from ' . $url);
+        }
+
+        if (File::put($this->PHPActorPath, $content) === false) {
+            throw new RuntimeException('Failed to save executable PHPActor to ' . $this->PHPActorPath);
+        }
+
+        // chmod only works on Unix-like systems
+        if (PHP_OS_FAMILY !== 'Windows') {
+            chmod($this->PHPActorPath, 0755);
+        }
     }
 }
