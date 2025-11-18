@@ -71,15 +71,16 @@ class V4 implements VersionStrategy
                 warning("Cannot parse rector result json: {$e->getMessage()}");
             }
 
-            info("Changed files {$rectorJsonOutput['totals']['changed_files']}:");
+            $changedFiles = $rectorJsonOutput['totals']['changed_files'] ?? 0;
+            info("Changed files {$changedFiles}:");
             if ($verbosityLevel == OutputInterface::VERBOSITY_NORMAL) {
-                foreach ($rectorJsonOutput['changed_files'] as $file) {
+                foreach ($rectorJsonOutput['changed_files'] ?? [] as $file) {
                     info($file);
                 }
             }
 
             if ($verbosityLevel >= OutputInterface::VERBOSITY_VERBOSE) {
-                foreach ($rectorJsonOutput['file_diffs'] as $diff) {
+                foreach ($rectorJsonOutput['file_diffs'] ?? [] as $diff) {
                     info("File: {$diff['file']}");
                     note("{$diff['diff']}");
                     note(str_repeat('=', 100));
@@ -95,11 +96,16 @@ class V4 implements VersionStrategy
         $resources = $this->filterResourcesByBaseDir($this->core->getResources());
 
         info('Upgrading resources and pages');
-        progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
-            $progress
-                ->label("Upgrading resource: {$resource->getTitle()}");
-            $this->upgradeResource($resource, $progress);
-        });
+        
+        if ($resources->isNotEmpty()) {
+            progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
+                $progress
+                    ->label("Upgrading resource: {$resource->getTitle()}");
+                $this->upgradeResource($resource, $progress);
+            });
+        } else {
+            info('No resources found to upgrade');
+        }
     }
 
     protected function upgradeResource(ResourceContract $resource, \Laravel\Prompts\Progress $progress): void
