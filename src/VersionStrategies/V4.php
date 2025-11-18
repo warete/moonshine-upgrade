@@ -44,6 +44,7 @@ class V4 implements VersionStrategy
         $processOutput = spin(function () {
             $rectorExecutablePath = base_path('vendor/bin/rector');
             $rectorUpgradePath = base_path('rector-upgrade.php');
+            $baseDir = $this->baseDir == base_path() ? '' : $this->baseDir;
             $command = [
                 PHP_BINARY,
                 $rectorExecutablePath,
@@ -51,11 +52,12 @@ class V4 implements VersionStrategy
                 $rectorUpgradePath,
                 '--clear-cache',
                 '--output-format=json',
-                $this->baseDir,
+                $baseDir,
             ];
             if ($this->isDryRun) {
                 $command[] = '--dry-run';
             }
+            $command = array_filter($command);
             $process = Process::command($command);
             $process->timeout(120);
 

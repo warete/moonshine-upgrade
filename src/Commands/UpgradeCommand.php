@@ -32,7 +32,7 @@ class UpgradeCommand extends MoonShineCommand
             '.', '/', './' => '',
             default => $this->option('dir'),
         };
-        $baseDir = base_path($dir);
+        $baseDir = realpath(base_path($dir));
 
         intro("Starting MoonShine upgrade to version {$version}");
 
