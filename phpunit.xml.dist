@@ -13,12 +13,11 @@
          verbose="true"
 >
     <testsuites>
-        <testsuite name="Suite">
+        <testsuite name="feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
         <testsuite name="unit">
             <directory suffix="Test.php">./tests/Unit</directory>
-            <file>./tests/Feature/V4/RectorRulesV4Test.php</file>
         </testsuite>
     </testsuites>
     <php>

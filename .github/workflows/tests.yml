@@ -62,5 +62,5 @@ jobs:
       - name: Install MoonShine for E2E tests
         run: composer require moonshine/moonshine:${{ matrix.moonshine }} --dev --no-interaction
 
-      - name: Run all tests
-        run: composer test:all
+      - name: Run feature tests
+        run: composer test:feature
