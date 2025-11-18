@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources\Comment;
 
-use MoonShine\Crud\Resources\CrudResource;
-use MoonShine\Contracts\UI\Crud\CrudRequestContract;
-use MoonShine\Support\Attributes\AsyncMethod;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\Crud\CrudRequestContract;
+use MoonShine\Crud\Resources\CrudResource;
+use MoonShine\Support\Attributes\AsyncMethod;
 
 class CommentResource extends CrudResource
 {
     public string $model = Comment::class;
-    
+
     public string $title = 'Comments';
 
     public function indexFields(): iterable

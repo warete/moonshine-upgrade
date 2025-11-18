@@ -10,7 +10,7 @@ use MoonShine\Laravel\Resources\CrudResource;
 class CommentResource extends CrudResource
 {
     public string $model = Comment::class;
-    
+
     public string $title = 'Comments';
 
     public function indexFields(): iterable
