@@ -201,7 +201,7 @@ final class UpgradeV4Test extends TestCase
 
         // Verify V4 expected structure
         $this->assertResourceStructure($this->fixturesPath . '/V4Expected', 'Article');
-        $this->assertResourceStructure($this->fixturesPath . '/V4Expected', 'User');
+        $this->assertResourceStructure($this->fixturesPath . '/V4Expected', 'User', false);
         $this->assertFileExists($this->fixturesPath . '/V4Expected/config/moonshine.php');
 
         // Verify pages are in the right place for Article

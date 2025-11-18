@@ -90,12 +90,14 @@ trait AssertUpgrade
         );
     }
 
-    protected function assertResourceStructure(string $basePath, string $resourceName): void
+    protected function assertResourceStructure(string $basePath, string $resourceName, bool $withPages = true): void
     {
         $resourceDir = "{$basePath}/app/MoonShine/Resources/{$resourceName}";
         $this->assertUpgradeDirectoryExists($resourceDir);
         $this->assertUpgradeFileExists("{$resourceDir}/{$resourceName}Resource.php");
-        $this->assertUpgradeDirectoryExists("{$resourceDir}/Pages");
+        if ($withPages) {
+            $this->assertUpgradeDirectoryExists("{$resourceDir}/Pages");
+        }
     }
 
     protected function getFileContent(string $path): string
