@@ -9,6 +9,14 @@ A small package that helps automate migration of a MoonShine application to a ne
 |:---------:|:-----------------:|:-------------------:|
 |  \>= 3.0  |        1.*        |         yes         |
 
+### Platform Support
+
+This package is tested and works on:
+- ✅ Linux/macOS
+- ✅ Windows (with limitations)
+
+**Windows Users**: For the best experience, we recommend using **WSL (Windows Subsystem for Linux)**. The package should work on native Windows, but we cannot guarantee 100% compatibility due to external dependencies (Rector and PHPActor) that may have Windows-specific quirks. If you encounter issues on Windows without WSL, please report them.
+
 ## Install
 
 **Make this before upgrade moonshine version in `composer.json`:**
