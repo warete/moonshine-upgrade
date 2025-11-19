@@ -10,8 +10,8 @@ use Warete\MoonshineUpgrade\Tests\TestCase;
 final class ExampleTest extends TestCase
 {
     #[Test]
-    public function it_example_test(): void
+    public function it_runs_basic_assertion(): void
     {
-        //
+        $this->assertTrue(true);
     }
 }

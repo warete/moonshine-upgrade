@@ -34,7 +34,7 @@ class V4 implements VersionStrategy
         protected string $baseDir,
         protected ?Command $command = null,
     ) {
-        $this->baseDir = rtrim($this->baseDir, '/');
+        $this->baseDir = rtrim($this->baseDir, '/\\');
         $this->core = $this->getCore();
     }
 
@@ -42,21 +42,28 @@ class V4 implements VersionStrategy
     {
         $verbosityLevel = $this->command?->getOutput()->getVerbosity();
         $processOutput = spin(function () {
-            $basePath = base_path();
-            $process = Process::command(
-                \sprintf(
-                    './vendor/bin/rector --config %s/rector-upgrade.php --clear-cache --output-format=json %s %s%s',
-                    $basePath,
-                    $this->isDryRun ? '--dry-run' : '',
-                    $this->baseDir,
-                    $this->isDryRun ? ' || exit 0' : ''
-                )
-            );
+            $rectorExecutablePath = base_path('vendor/bin/rector');
+            $rectorUpgradePath = base_path('rector-upgrade.php');
+            $baseDir = $this->baseDir == base_path() ? '' : $this->baseDir;
+            $command = [
+                PHP_BINARY,
+                $rectorExecutablePath,
+                '--config',
+                $rectorUpgradePath,
+                '--clear-cache',
+                '--output-format=json',
+                $baseDir,
+            ];
+            if ($this->isDryRun) {
+                $command[] = '--dry-run';
+            }
+            $command = array_filter($command);
+            $process = Process::command($command);
             $process->timeout(120);
 
             return $process->run();
         }, 'Upgrade by rector in progress');
-        if ($processOutput->successful()) {
+        if ($processOutput->successful() || (! $processOutput->successful() && $this->isDryRun)) {
             try {
                 $rectorJsonOutput = json_decode($processOutput->output(), true);
             } catch (Throwable $e) {
@@ -64,15 +71,16 @@ class V4 implements VersionStrategy
                 warning("Cannot parse rector result json: {$e->getMessage()}");
             }
 
-            info("Changed files {$rectorJsonOutput['totals']['changed_files']}:");
+            $changedFiles = $rectorJsonOutput['totals']['changed_files'] ?? 0;
+            info("Changed files {$changedFiles}:");
             if ($verbosityLevel == OutputInterface::VERBOSITY_NORMAL) {
-                foreach ($rectorJsonOutput['changed_files'] as $file) {
+                foreach ($rectorJsonOutput['changed_files'] ?? [] as $file) {
                     info($file);
                 }
             }
 
             if ($verbosityLevel >= OutputInterface::VERBOSITY_VERBOSE) {
-                foreach ($rectorJsonOutput['file_diffs'] as $diff) {
+                foreach ($rectorJsonOutput['file_diffs'] ?? [] as $diff) {
                     info("File: {$diff['file']}");
                     note("{$diff['diff']}");
                     note(str_repeat('=', 100));
@@ -88,11 +96,16 @@ class V4 implements VersionStrategy
         $resources = $this->filterResourcesByBaseDir($this->core->getResources());
 
         info('Upgrading resources and pages');
-        progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
-            $progress
-                ->label("Upgrading resource: {$resource->getTitle()}");
-            $this->upgradeResource($resource, $progress);
-        });
+
+        if ($resources->isNotEmpty()) {
+            progress('Upgrading resources', $resources, function (ResourceContract $resource, \Laravel\Prompts\Progress $progress): void {
+                $progress
+                    ->label("Upgrading resource: {$resource->getTitle()}");
+                $this->upgradeResource($resource, $progress);
+            });
+        } else {
+            info('No resources found to upgrade');
+        }
     }
 
     protected function upgradeResource(ResourceContract $resource, \Laravel\Prompts\Progress $progress): void
@@ -184,7 +197,11 @@ class V4 implements VersionStrategy
             $rResource = new ReflectionClass($resource);
             $classFilePath = $rResource->getFileName();
 
-            return str($classFilePath)->lower()->startsWith(str($this->baseDir)->lower()->value());
+            // realpath() normalizes path separators automatically
+            $realClassPath = realpath($classFilePath) ?: $classFilePath;
+            $realBaseDir = realpath($this->baseDir) ?: $this->baseDir;
+
+            return str($realClassPath)->lower()->startsWith(str($realBaseDir)->lower()->value());
         });
     }
 }

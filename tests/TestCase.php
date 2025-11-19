@@ -61,4 +61,16 @@ abstract class TestCase extends Orchestra
     {
         return 'test';
     }
+
+    /**
+     * Run upgrade command with automatic confirmation mocking
+     */
+    protected function runUpgrade(array $options = []): \Illuminate\Testing\PendingCommand
+    {
+        return $this->artisan('moonshine:upgrade', $options)
+            ->expectsConfirmation(
+                'Are you sure you want to upgrade moonshine? This operation can change your files. Please make backup before continuing.',
+                'yes'
+            );
+    }
 }

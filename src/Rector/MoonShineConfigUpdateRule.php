@@ -34,7 +34,8 @@ final class MoonShineConfigUpdateRule extends AbstractRector
         }
 
         $filePath = $this->file->getFilePath();
-        if (! str_ends_with($filePath, '/config/moonshine.php')) {
+        $configPath = 'config' . DIRECTORY_SEPARATOR . 'moonshine.php';
+        if (! str_ends_with($filePath, $configPath)) {
             return null;
         }
 

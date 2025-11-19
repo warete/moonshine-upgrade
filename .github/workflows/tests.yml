@@ -1,0 +1,73 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+   types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  unit-tests:
+    name: Unit Tests (PHP ${{ matrix.php }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        php: ['8.2', '8.3', '8.4']
+        moonshine: ['^4.0']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, json, bcmath, fileinfo, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install MoonShine for unit tests
+        run: composer require moonshine/moonshine:${{ matrix.moonshine }} --dev --no-interaction
+
+      - name: Run unit tests
+        run: composer test:unit
+
+  e2e-tests:
+    name: E2E Tests with MoonShine (PHP ${{ matrix.php }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        php: ['8.2', '8.3', '8.4']
+        moonshine: ['^4.0']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, json, bcmath, fileinfo, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install MoonShine for E2E tests
+        run: composer require moonshine/moonshine:${{ matrix.moonshine }} --dev --no-interaction
+
+      - name: Run feature tests
+        run: composer test:feature

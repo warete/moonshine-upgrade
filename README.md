@@ -9,6 +9,14 @@ A small package that helps automate migration of a MoonShine application to a ne
 |:---------:|:-----------------:|:-------------------:|
 |  \>= 3.0  |        1.*        |         yes         |
 
+### Platform Support
+
+This package is tested and works on:
+- ✅ Linux/macOS
+- ✅ Windows (with limitations)
+
+**Windows Users**: For the best experience, we recommend using **WSL (Windows Subsystem for Linux)**. The package should work on native Windows, but we cannot guarantee 100% compatibility due to external dependencies (Rector and PHPActor) that may have Windows-specific quirks. If you encounter issues on Windows without WSL, please report them.
+
 ## Install
 
 **Make this before upgrade moonshine version in `composer.json`:**
@@ -40,3 +48,27 @@ The upgrade command can be run multiple times — it will update only the outdat
   - Method signatures, namespaces, classes, interfaces, traits, properties and attributes changed.
   - Resources and their pages will be adapted to the new structure.
   - The `config/moonshine.php` configuration will be updated to support the latest features.
+
+
+## Testing
+
+This package includes two types of tests:
+
+### Unit Tests (No MoonShine required) ✅
+Run lightweight tests that validate Rector rules and fixtures without requiring a full MoonShine installation:
+
+```bash
+composer test:unit
+# or
+composer test:v4
+```
+
+These tests will always pass in CI/CD and during package development.
+
+### Full E2E Tests (Requires MoonShine)
+To run the complete test suite including end-to-end upgrade tests:
+
+1. Install MoonShine manually: `composer require moonshine/moonshine:^4.0 --dev`
+2. Run all tests: `composer test:all`
+
+**Note**: MoonShine is intentionally not in `require-dev` to avoid version conflicts when this package is used within MoonShine applications. The E2E tests are primarily for development and validation in isolated environments.
