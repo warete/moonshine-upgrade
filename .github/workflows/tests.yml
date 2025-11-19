@@ -8,11 +8,12 @@ on:
 
 jobs:
   unit-tests:
-    name: Unit Tests (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    name: Unit Tests (PHP ${{ matrix.php }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         php: ['8.2', '8.3', '8.4']
         moonshine: ['^4.0']
 
@@ -24,7 +25,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, xml, ctype, json, bcmath
+          extensions: mbstring, xml, ctype, json, bcmath, fileinfo, pdo_sqlite
           coverage: none
 
       - name: Install dependencies
@@ -37,11 +38,12 @@ jobs:
         run: composer test:unit
 
   e2e-tests:
-    name: E2E Tests with MoonShine (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    name: E2E Tests with MoonShine (PHP ${{ matrix.php }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         php: ['8.2', '8.3', '8.4']
         moonshine: ['^4.0']
 
@@ -53,7 +55,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, xml, ctype, json, bcmath
+          extensions: mbstring, xml, ctype, json, bcmath, fileinfo, pdo_sqlite
           coverage: none
 
       - name: Install dependencies
