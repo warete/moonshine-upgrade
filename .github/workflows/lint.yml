@@ -1,6 +1,11 @@
 # .github/workflows/lint.yml
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 name: Check & fix styling
 jobs:
     php-cs-fixer:
