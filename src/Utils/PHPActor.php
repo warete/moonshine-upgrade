@@ -27,7 +27,7 @@ class PHPActor
             $from,
             $to,
         ]);
-        $process->timeout(60);
+        $process->timeout(120);
 
         $processOutput = $process->run();
 

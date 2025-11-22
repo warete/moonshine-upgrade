@@ -3,8 +3,10 @@
 namespace Warete\MoonshineUpgrade\VersionStrategies;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Process;
 
+use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\progress;
@@ -63,14 +65,18 @@ class V4 implements VersionStrategy
 
             return $process->run();
         }, 'Upgrade by rector in progress');
-        if ($processOutput->successful() || (! $processOutput->successful() && $this->isDryRun)) {
-            try {
-                $rectorJsonOutput = json_decode($processOutput->output(), true);
-            } catch (Throwable $e) {
-                $rectorJsonOutput = [];
-                warning("Cannot parse rector result json: {$e->getMessage()}");
-            }
 
+        try {
+            $rectorJsonOutput = json_decode($processOutput->output(), true);
+        } catch (Throwable $e) {
+            $rectorJsonOutput = [];
+            warning("Cannot parse rector result json: {$e->getMessage()}");
+        }
+        $errorsCnt = (int) Arr::get($rectorJsonOutput, 'totals.errors');
+        if ($errorsCnt > 0) {
+            error("Errors count: {$errorsCnt}");
+        }
+        if ($processOutput->successful() || (! $processOutput->successful() && $this->isDryRun)) {
             $changedFiles = $rectorJsonOutput['totals']['changed_files'] ?? 0;
             info("Changed files {$changedFiles}:");
             if ($verbosityLevel == OutputInterface::VERBOSITY_NORMAL) {
