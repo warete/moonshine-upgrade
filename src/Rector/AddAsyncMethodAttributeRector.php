@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Warete\MoonshineUpgrade\Rector;
 
+use Illuminate\Support\Arr;
 use PhpParser\Node;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Attribute;
@@ -44,7 +45,9 @@ final class AddAsyncMethodAttributeRector extends AbstractRector implements Conf
 
     public function configure(array $configuration): void
     {
-        ['attributeFqcn' => $attributeFqcn, 'allowedBuilderClasses' => $allowedBuilderClasses, 'asyncMethodSelectors' => $asyncMethodSelectors] = $configuration;
+        $attributeFqcn = Arr::get($configuration, 'attributeFqcn');
+        $allowedBuilderClasses = Arr::get($configuration, 'allowedBuilderClasses');
+        $asyncMethodSelectors = Arr::get($configuration, 'asyncMethodSelectors');
         if (! $asyncMethodSelectors) {
             $asyncMethodSelectors = ['asyncMethod', 'method', 'onChangeMethod', 'getAsyncMethodUrl'];
         }
